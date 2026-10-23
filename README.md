@@ -1,2 +1,2 @@
-# CSIT314-HASH
-CSIT314 Interior Designer Project
+# CSIT314-HASH-Interior Designer Project
+Group project for CSIT314
