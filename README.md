@@ -7,7 +7,7 @@ mini-FYP group project for CSIT314
 
 - **Backend:** Python 3.9 + Django 4.2 + Django REST Framework
 - **Frontend:** React 18 + Vite + Material UI (MUI) + Chart.js
-- **Database:** SQLite (zero setup)
+- **Database:** SQLite
 - **CI/CD:** GitHub Actions
 - **Agile tool:** Taiga
 
