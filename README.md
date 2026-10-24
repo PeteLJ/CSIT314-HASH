@@ -1,6 +1,6 @@
 # CSIT314-HASH
-# Interior Designer Project
-mini-FYP group project for CSIT314
+# Interior Design Matching Web Application
+Mini-FYP group project for CSIT314
 
 
 ## Tech Stack
