@@ -1,5 +1,6 @@
-# CSIT314-HASH-Interior Designer Project
-Group project for CSIT314
+# CSIT314-HASH
+# Interior Designer Project
+mini-FYP group project for CSIT314
 
 
 ## Tech Stack
@@ -25,7 +26,7 @@ python manage.py createsuperuser
 python manage.py runserver
 ```
 
-The backend runs at `http://127.0.0.1:8000`. The admin panel is at `http://127.0.0.1:8000/admin/`.
+The backend & Database runs in Google Cloud VM?, at `TBC`. The admin panel is at `TBC`.
 
 ### Frontend
 
@@ -35,13 +36,13 @@ npm install
 npm run dev
 ```
 
-The frontend runs at `http://localhost:5173`.
+The frontend runs in Github Pages, at `TBC`.
 
 ## Project Structure
 
 ```
 main/
-├── backend/          # Django project
+├── backend/          # Django project      (current state: pending creation)
 │   ├── config/       # Settings, URLs, WSGI
 │   ├── accounts/     # User model, roles, permissions
 │   ├── projects/     # IDP, IDPViewEvent, Favourite
@@ -49,7 +50,7 @@ main/
 │   ├── categories/   # Category model
 │   ├── requirements.txt
 │   └── .env.example
-├── frontend/         # React + Vite project (pending development)
+├── frontend/         # React + Vite project      (current state: blank template web app)
 │   ├── src/
 │   └── package.json
 ├── .github/workflows/ci.yml
@@ -58,13 +59,13 @@ main/
 ```
 
 ## User Roles
-
+4 actors
 | Role | Description |
 |---|---|
 | Customer | Browses and saves design projects |
 | Interior Designer | Manages company info and portfolio |
 | User Admin | Manages user accounts |
-| Platform Management | Manages categories and reports |
+| Platform Manager | Manages categories and reports |
 
 ## Running Tests
 
