@@ -1,48 +1,44 @@
-﻿import { useState, useEffect } from 'react'
+﻿import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
+import BrowsePage from './pages/BrowsePage'
+import DetailPage from './pages/DetailPage'
+import DashboardPage from './pages/DashboardPage'
+import TrendPage from './pages/TrendPage'
+import CreatePage from './pages/CreatePage'
+import CategoriesPage from './pages/CategoriesPage'
+import ModerationPage from './pages/ModerationPage'
 import './App.css'
 
-function App() {
-  const [projects, setProjects] = useState([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    // Fetch projects from the Django backend API
-    fetch('http://127.0.0.1:8000/api/idps/')
-      .then(res => res.json())
-      .then(data => {
-        setProjects(data.results || data)
-        setLoading(false)
-      })
-      .catch(err => {
-        console.error('Failed to fetch projects:', err)
-        setLoading(false)
-      })
-  }, [])
-
+// Navigation bar with logo placeholder and page links\nfunction Nav() {
   return (
-    <div className="App">
-      <h1>Interior Design Matching Platform</h1>
-      <p>Customer / Interior Designer / User Admin / Platform Management</p>
+    <nav style={{ padding: '1rem', borderBottom: '1px solid #ccc', marginBottom: '1rem', display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
+      <div style={{ marginRight: '1rem', width: '40px', height: '40px', border: '2px dashed #999', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: '#999' }}>
+        LOGO
+      </div>
+      <Link to="/">Browse Projects</Link>
+      <Link to="/dashboard" style={{ marginLeft: '1rem' }}>Designer Dashboard</Link>
+      <Link to="/create" style={{ marginLeft: '1rem' }}>Create Project</Link>
+      <Link to="/categories" style={{ marginLeft: '1rem' }}>Categories</Link>
+      <Link to="/moderation" style={{ marginLeft: '1rem' }}>Moderation</Link>
+    </nav>
+  )
+}
 
-      {loading ? (
-        <p>Loading projects...</p>
-      ) : (
-        <div>
-          <h2>Design Projects</h2>
-          {projects.length === 0 ? (
-            <p>No projects found. Create some in the Django admin panel.</p>
-          ) : (
-            <ul>
-              {projects.map(project => (
-                <li key={project.id}>
-                  <strong>{project.title}</strong> — {project.style} ({project.status})
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      )}
-    </div>
+function App() {
+  return (
+    <BrowserRouter>
+      <Nav />
+      <div style={{ padding: '0 1rem' }}>
+        <Routes>
+          <Route path="/" element={<BrowsePage />} />
+          <Route path="/project/:id" element={<DetailPage />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/trend/:id" element={<TrendPage />} />
+          <Route path="/create" element={<CreatePage />} />
+          <Route path="/categories" element={<CategoriesPage />} />
+          <Route path="/moderation" element={<ModerationPage />} />
+        </Routes>
+      </div>
+    </BrowserRouter>
   )
 }
 
