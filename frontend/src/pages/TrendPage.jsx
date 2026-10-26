@@ -6,7 +6,8 @@ import { apiGet } from '../api/client'
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend)
 
-// Trend chart showing views and shortlists over time\nfunction TrendPage() {
+// Trend chart showing views and shortlists over time
+function TrendPage() {
   const { id } = useParams()
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -44,7 +45,7 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, T
   return (
     <div>
       <Link to="/dashboard">? Back to Dashboard</Link>
-      <h1>Interest Trend: {data.idp_title}</h1>
+      <h1>Interest Trend: {data.project_title}</h1>
       <div style={{ marginBottom: '1rem' }}>
         <label>Period: </label>
         <select value={period} onChange={e => setPeriod(e.target.value)}>
@@ -63,3 +64,4 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, T
 }
 
 export default TrendPage
+

@@ -2,22 +2,26 @@
 from django.conf import settings
 
 
-# Interior Design Project model - managed by Interior Designers\nclass InteriorDesignProject(models.Model):
+# Interior Design Project model - managed by Interior Designers
+class InteriorDesignProject(models.Model):
     """Interior Design Project - managed by Interior Designers."""
 
-    # Publication status choices\n    class Status(models.TextChoices):
+    # Publication status choices
+    class Status(models.TextChoices):
         DRAFT = 'DRAFT', 'Draft'
         PUBLISHED = 'PUBLISHED', 'Published'
         ARCHIVED = 'ARCHIVED', 'Archived'
 
-    # Room type choices\n    class RoomType(models.TextChoices):
+    # Room type choices
+    class RoomType(models.TextChoices):
         LIVING_ROOM = 'LIVING_ROOM', 'Living Room'
         BEDROOM = 'BEDROOM', 'Bedroom'
         KITCHEN = 'KITCHEN', 'Kitchen'
         BATHROOM = 'BATHROOM', 'Bathroom'
         WHOLE_UNIT = 'WHOLE_UNIT', 'Whole Unit'
 
-    # FK to the designer who owns this project\n    designer = models.ForeignKey(
+    # FK to the designer who owns this project
+    designer = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='interior_design_projects',
@@ -47,19 +51,23 @@ from django.conf import settings
         return f'{self.title} ({self.get_status_display()})'
 
 
-# Tracks view and shortlist events on projects\nclass InterestEvent(models.Model):
+# Tracks view and shortlist events on projects
+class InterestEvent(models.Model):
     """Records an interest event (view or shortlist) on an Interior Design Project."""
 
-    # Event type - view or shortlist\n    class EventType(models.TextChoices):
+    # Event type - view or shortlist
+    class EventType(models.TextChoices):
         VIEW = 'VIEW', 'View'
         SHORTLIST = 'SHORTLIST', 'Shortlist'
 
-    # FK to the project this event belongs to\n    project = models.ForeignKey(
+    # FK to the project this event belongs to
+    project = models.ForeignKey(
         InteriorDesignProject,
         on_delete=models.CASCADE,
         related_name='interest_events',
     )
-    # FK to the customer (only for shortlist events)\n    customer = models.ForeignKey(
+    # FK to the customer (only for shortlist events)
+    customer = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         null=True,

@@ -10,7 +10,8 @@ from .serializers import InteriorDesignProjectSerializer, InterestEventSerialize
 # --- US-31: Browse Design Projects ---
 # Guide: ProjectController.getProjectsForBrowse(), ProjectServiceImpl.fetchAllProjects()
 
-# Browse all published projects, create new project\nclass ProjectController(generics.ListCreateAPIView):
+# Browse all published projects, create new project
+class ProjectController(generics.ListCreateAPIView):
     """Browse all published projects. Create a new project (draft or published)."""
     serializer_class = InteriorDesignProjectSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
@@ -43,13 +44,15 @@ from .serializers import InteriorDesignProjectSerializer, InterestEventSerialize
 # --- US-35: View Project Details ---
 # Guide: ProjectController.getProjectDetails(), ProjectServiceImpl.fetchProjectsById()
 
-# Get, update, or delete a single project\nclass ProjectDetailView(generics.RetrieveUpdateDestroyAPIView):
+# Get, update, or delete a single project
+class ProjectDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = InteriorDesignProject.objects.all()
     serializer_class = InteriorDesignProjectSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
-# Toggle publication status (draft/published/archived)\nclass ProjectPublishView(APIView):
+# Toggle publication status (draft/published/archived)
+class ProjectPublishView(APIView):
     """Toggle publication status: DRAFT -> PUBLISHED -> ARCHIVED."""
     permission_classes = [permissions.IsAuthenticated]
 
@@ -68,7 +71,8 @@ from .serializers import InteriorDesignProjectSerializer, InterestEventSerialize
         return Response({'id': project.id, 'status': project.status})
 
 
-# Record a view event when customer opens project detail\nclass RecordViewView(APIView):
+# Record a view event when customer opens project detail
+class RecordViewView(APIView):
     """Records a VIEW interest event. Called when a customer opens a project detail page."""
     permission_classes = [permissions.AllowAny]
 
@@ -83,7 +87,8 @@ from .serializers import InteriorDesignProjectSerializer, InterestEventSerialize
 
 # --- Interest Events (shortlists/favourites) ---
 
-# List and create interest events (shortlists/favourites)\nclass InterestEventListView(generics.ListCreateAPIView):
+# List and create interest events (shortlists/favourites)
+class InterestEventListView(generics.ListCreateAPIView):
     serializer_class = InterestEventSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -99,7 +104,8 @@ from .serializers import InteriorDesignProjectSerializer, InterestEventSerialize
         serializer.save(customer=self.request.user)
 
 
-# Remove a shortlist/favourite\nclass InterestEventDetailView(generics.DestroyAPIView):
+# Remove a shortlist/favourite
+class InterestEventDetailView(generics.DestroyAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):

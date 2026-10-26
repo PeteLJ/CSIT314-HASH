@@ -2,7 +2,8 @@
 import { Link } from 'react-router-dom'
 import { apiGet } from '../api/client'
 
-// Designer dashboard showing portfolio interest overview\nfunction DashboardPage() {
+// Designer dashboard showing portfolio interest overview
+function DashboardPage() {
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
 

@@ -1,7 +1,8 @@
 ﻿import { useState, useEffect } from 'react'
 import { apiGet, apiPost, apiDelete } from '../api/client'
 
-// Manage project categories (add/delete)\nfunction CategoriesPage() {
+// Manage project categories (add/delete)
+function CategoriesPage() {
   const [categories, setCategories] = useState([])
   const [loading, setLoading] = useState(true)
   const [newName, setNewName] = useState('')

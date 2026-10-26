@@ -9,7 +9,8 @@ from projects.models import InteriorDesignProject, InterestEvent
 User = get_user_model()
 
 
-# Portfolio interest overview for a designer\nclass PortfolioInterestView(APIView):
+# Portfolio interest overview for a designer
+class PortfolioInterestView(APIView):
     """Returns total views, total shortlists, and ranked projects for the logged-in designer."""
     permission_classes = [permissions.AllowAny]
 
@@ -56,7 +57,8 @@ User = get_user_model()
         })
 
 
-# Trend chart data for a single project\nclass TrendChartView(APIView):
+# Trend chart data for a single project
+class TrendChartView(APIView):
     """Returns view and shortlist counts bucketed by period for a single project."""
     permission_classes = [permissions.AllowAny]
 
@@ -110,7 +112,8 @@ User = get_user_model()
         })
 
 
-# Get view count for a single project\nclass ViewCountView(APIView):
+# Get view count for a single project
+class ViewCountView(APIView):
     """Returns the view count for a single project."""
     permission_classes = [permissions.AllowAny]
 
@@ -123,7 +126,8 @@ User = get_user_model()
         return Response({'project_id': project.id, 'view_count': count})
 
 
-# Get shortlist count for a single project\nclass ShortlistCountView(APIView):
+# Get shortlist count for a single project
+class ShortlistCountView(APIView):
     """Returns the shortlist count for a single project."""
     permission_classes = [permissions.AllowAny]
 

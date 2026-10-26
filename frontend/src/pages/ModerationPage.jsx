@@ -1,7 +1,8 @@
 ﻿import { useState, useEffect } from 'react'
 import { apiGet, apiPatch } from '../api/client'
 
-// Review and flag inappropriate project content\nfunction ModerationPage() {
+// Review and flag inappropriate project content
+function ModerationPage() {
   const [projects, setProjects] = useState([])
   const [loading, setLoading] = useState(true)
 

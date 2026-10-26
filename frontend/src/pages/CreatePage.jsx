@@ -2,7 +2,8 @@
 import { useNavigate } from 'react-router-dom'
 import { apiPost } from '../api/client'
 
-// Form to create a new design project\nfunction CreatePage() {
+// Form to create a new design project
+function CreatePage() {
   const navigate = useNavigate()
   const [form, setForm] = useState({
     title: '',

@@ -2,7 +2,8 @@
 import { Link } from 'react-router-dom'
 import { apiGet } from '../api/client'
 
-// Browse all published design projects with filters\nfunction BrowsePage() {
+// Browse all published design projects with filters
+function BrowsePage() {
   const [projects, setProjects] = useState([])
   const [loading, setLoading] = useState(true)
   const [styleFilter, setStyleFilter] = useState('')

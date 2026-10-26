@@ -2,7 +2,8 @@
 from .models import InteriorDesignProject, InterestEvent
 
 
-# Serializer for InteriorDesignProject model\nclass InteriorDesignProjectSerializer(serializers.ModelSerializer):
+# Serializer for InteriorDesignProject model
+class InteriorDesignProjectSerializer(serializers.ModelSerializer):
     designer_name = serializers.CharField(source='designer.username', read_only=True)
 
     class Meta:
@@ -13,7 +14,8 @@ from .models import InteriorDesignProject, InterestEvent
         read_only_fields = ('designer', 'created_at', 'updated_at')
 
 
-# Serializer for InterestEvent model\nclass InterestEventSerializer(serializers.ModelSerializer):
+# Serializer for InterestEvent model
+class InterestEventSerializer(serializers.ModelSerializer):
     class Meta:
         model = InterestEvent
         fields = ('id', 'project', 'customer', 'occurred_at', 'event_type')

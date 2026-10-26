@@ -2,7 +2,8 @@
 import { useParams, Link } from 'react-router-dom'
 import { apiGet, apiPost } from '../api/client'
 
-// Show full details of a single project and record the view\nfunction DetailPage() {
+// Show full details of a single project and record the view
+function DetailPage() {
   const { id } = useParams()
   const [project, setProject] = useState(null)
   const [loading, setLoading] = useState(true)

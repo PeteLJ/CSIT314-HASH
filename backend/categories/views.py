@@ -3,7 +3,8 @@ from .models import Category
 from .serializers import CategorySerializer
 
 
-# List and create categories\nclass CategoryListView(generics.ListCreateAPIView):
+# List and create categories
+class CategoryListView(generics.ListCreateAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = [permissions.AllowAny]
