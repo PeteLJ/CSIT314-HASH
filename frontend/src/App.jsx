@@ -1,4 +1,4 @@
-﻿import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
+﻿import { HashRouter, Routes, Route, Link } from 'react-router-dom'
 import BrowsePage from './pages/BrowsePage'
 import DetailPage from './pages/DetailPage'
 import DashboardPage from './pages/DashboardPage'
@@ -25,7 +25,7 @@ function Nav() {
 
 function App() {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <Nav />
       <div style={{ padding: '0 1rem' }}>
         <Routes>
@@ -38,7 +38,7 @@ function App() {
           <Route path="/moderation" element={<ModerationPage />} />
         </Routes>
       </div>
-    </BrowserRouter>
+    </HashRouter>
   )
 }
 
