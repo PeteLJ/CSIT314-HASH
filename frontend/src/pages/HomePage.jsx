@@ -65,7 +65,6 @@ function HomePage() {
       {/* Featured Designs carousel */}
       <section style={{ marginBottom: '2rem', padding: '0 1rem' }}>
         <h2>Featured Designs</h2>
-        <p style={{ color: '#888', fontSize: '0.9rem' }}>Auto-scrolling every 5 seconds</p>
         <div
           ref={carouselRef}
           style={{
@@ -91,7 +90,7 @@ function HomePage() {
             >
               <h3>{project.title}</h3>
               <p>Style: {project.style}</p>
-              <p><em>Image placeholder - add project image here</em></p>
+              <p><em>Image placeholder - add interior design image here</em></p>
             </div>
           ))}
         </div>
