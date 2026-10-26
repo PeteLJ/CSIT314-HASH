@@ -1,12 +1,13 @@
 ﻿import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { apiGet } from '../api/client'
 
 // Browse all published design projects with filters
 function BrowsePage() {
   const [projects, setProjects] = useState([])
   const [loading, setLoading] = useState(true)
-  const [styleFilter, setStyleFilter] = useState('')
+  const [searchParams] = useSearchParams()
+  const [styleFilter, setStyleFilter] = useState(searchParams.get('style') || '')
   const [budgetFilter, setBudgetFilter] = useState('')
 
   useEffect(() => {
@@ -55,4 +56,5 @@ function BrowsePage() {
 }
 
 export default BrowsePage
+
 

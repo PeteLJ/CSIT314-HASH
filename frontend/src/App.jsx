@@ -1,4 +1,5 @@
 ﻿import { HashRouter, Routes, Route, Link } from 'react-router-dom'
+import HomePage from './pages/HomePage'
 import BrowsePage from './pages/BrowsePage'
 import DetailPage from './pages/DetailPage'
 import DashboardPage from './pages/DashboardPage'
@@ -14,7 +15,8 @@ function Nav() {
       <div style={{ marginRight: '1rem', width: '40px', height: '40px', border: '2px dashed #999', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: '#999' }}>
         LOGO
       </div>
-      <Link to="/">Browse Projects</Link>
+      <Link to="/">Home</Link>
+      <Link to="/browse" style={{ marginLeft: '1rem' }}>Browse Projects</Link>
       <Link to="/dashboard" style={{ marginLeft: '1rem' }}>Designer Dashboard</Link>
       <Link to="/create" style={{ marginLeft: '1rem' }}>Create Project</Link>
       <Link to="/categories" style={{ marginLeft: '1rem' }}>Categories</Link>
@@ -29,7 +31,8 @@ function App() {
       <Nav />
       <div style={{ padding: '0 1rem' }}>
         <Routes>
-          <Route path="/" element={<BrowsePage />} />
+          <Route path="/" element={<HomePage />} />
+          <Route path="/browse" element={<BrowsePage />} />
           <Route path="/project/:id" element={<DetailPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/trend/:id" element={<TrendPage />} />
