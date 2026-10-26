@@ -1,4 +1,4 @@
-name: Deploy Frontend to GitHub Pages
+﻿name: Deploy Frontend to GitHub Pages
 
 on:
   push:
@@ -17,18 +17,17 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: frontend
     steps:
       - uses: actions/checkout@v4
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
       - name: Install dependencies
+        working-directory: frontend
         run: npm install
       - name: Build
+        working-directory: frontend
         run: npm run build
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
@@ -45,3 +44,4 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
