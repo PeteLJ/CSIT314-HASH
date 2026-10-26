@@ -134,9 +134,9 @@ function HomePage() {
       </section>
 
       {/* How It Works */}
-      <section style={{ padding: '0 1rem', marginBottom: '2rem' }}>
+      <section style={{ padding: '0 1rem', marginBottom: '2rem', textAlign: 'center' }}>
         <h2>How It Works</h2>
-        <ol style={{ listStyle: 'none', padding: 0 }}>
+        <ol style={{ listStyle: 'none', padding: 0, display: 'inline-block', textAlign: 'left' }}>
           <li style={{ display: 'flex', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
             <span style={{ fontWeight: 'bold', marginRight: '0.75rem', color: '#1976d2', minWidth: '24px' }}>1.</span>
             <span>Browse design projects by style, budget, and room type</span>
@@ -164,7 +164,7 @@ function HomePage() {
         color: '#888',
         fontSize: '0.9rem',
       }}>
-        <p>Placeholder footer text - add your content here</p>
+        <p>Placeholder footer text - for future edits</p>
         <p style={{ marginTop: '0.5rem' }}>HASH Designs &copy; 2026</p>
       </footer>
     </div>
