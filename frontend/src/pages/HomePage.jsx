@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 
 function HomePage() {
@@ -38,7 +38,7 @@ function HomePage() {
       <div style={{
         textAlign: 'center',
         padding: '4rem 1rem',
-        background: '#f5f5f5',
+        background: 'rgba(255, 255, 255, 0.05)',
         marginBottom: '2rem',
         minHeight: '300px',
         display: 'flex',
@@ -47,7 +47,7 @@ function HomePage() {
         alignItems: 'center',
       }}>
         <h1 style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>Welcome to HASH Designs</h1>
-        <p style={{ fontSize: '1.2rem', marginBottom: '2rem', color: '#555' }}>
+        <p style={{ fontSize: '1.2rem', marginBottom: '2rem', color: '#ffffff' }}>
           Find the perfect interior designer for your renovation project.
         </p>
         <Link to="/browse" style={{
@@ -55,7 +55,7 @@ function HomePage() {
           background: '#1976d2',
           color: 'white',
           textDecoration: 'none',
-          borderRadius: '4px',
+          borderRadius: '24px',
           fontSize: '1.1rem',
         }}>
           Browse All Projects
@@ -81,11 +81,12 @@ function HomePage() {
               style={{
                 minWidth: '100%',
                 scrollSnapAlign: 'start',
-                border: '1px dashed #ccc',
+                border: '1px dashed rgba(255,255,255,0.3)',
                 padding: '3rem',
                 textAlign: 'center',
                 boxSizing: 'border-box',
-                background: '#fafafa',
+                background: 'rgba(255, 255, 255, 0.08)',
+                borderRadius: '12px',
               }}
             >
               <h3>{project.title}</h3>
@@ -113,12 +114,19 @@ function HomePage() {
         </div>
       </section>
 
-      {/* Browse by Style */}
-      <section style={{ marginBottom: '2rem', padding: '0 1rem' }}>
+      {/* Browse by Style - centered */}
+      <section style={{ marginBottom: '2rem', padding: '0 1rem', textAlign: 'center' }}>
         <h2>Browse by Style</h2>
-        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', justifyContent: 'center', marginTop: '1rem' }}>
           {styles.map(style => (
-            <Link key={style} to={`/browse?style=${style}`} style={{ padding: '0.5rem 1rem', border: '1px solid #ccc', textDecoration: 'none', color: 'black', borderRadius: '4px' }}>
+            <Link key={style} to={`/browse?style=${style}`} style={{
+              padding: '0.5rem 1.5rem',
+              border: '1px solid rgba(255,255,255,0.3)',
+              textDecoration: 'none',
+              color: '#e0e0e0',
+              borderRadius: '24px',
+              background: 'rgba(255,255,255,0.05)',
+            }}>
               {style}
             </Link>
           ))}
@@ -128,13 +136,37 @@ function HomePage() {
       {/* How It Works */}
       <section style={{ padding: '0 1rem', marginBottom: '2rem' }}>
         <h2>How It Works</h2>
-        <ol>
-          <li>Browse design projects by style, budget, and room type</li>
-          <li>View project details and save your favourites</li>
-          <li>Find interior designers that match your needs</li>
-          <li>Track interest in your own projects (for designers)</li>
+        <ol style={{ listStyle: 'none', padding: 0 }}>
+          <li style={{ display: 'flex', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
+            <span style={{ fontWeight: 'bold', marginRight: '0.75rem', color: '#1976d2', minWidth: '24px' }}>1.</span>
+            <span>Browse design projects by style, budget, and room type</span>
+          </li>
+          <li style={{ display: 'flex', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
+            <span style={{ fontWeight: 'bold', marginRight: '0.75rem', color: '#1976d2', minWidth: '24px' }}>2.</span>
+            <span>View project details and save your favourites</span>
+          </li>
+          <li style={{ display: 'flex', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
+            <span style={{ fontWeight: 'bold', marginRight: '0.75rem', color: '#1976d2', minWidth: '24px' }}>3.</span>
+            <span>Find interior designers that match your needs</span>
+          </li>
+          <li style={{ display: 'flex', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
+            <span style={{ fontWeight: 'bold', marginRight: '0.75rem', color: '#1976d2', minWidth: '24px' }}>4.</span>
+            <span>Track interest in your own projects (for designers)</span>
+          </li>
         </ol>
       </section>
+
+      {/* Footer */}
+      <footer style={{
+        textAlign: 'center',
+        padding: '2rem 1rem',
+        borderTop: '1px solid rgba(255,255,255,0.1)',
+        color: '#888',
+        fontSize: '0.9rem',
+      }}>
+        <p>Placeholder footer text - add your content here</p>
+        <p style={{ marginTop: '0.5rem' }}>HASH Designs &copy; 2026</p>
+      </footer>
     </div>
   )
 }
