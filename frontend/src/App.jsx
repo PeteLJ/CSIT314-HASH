@@ -12,6 +12,16 @@ import './App.css'
 
 function Nav() {
   const [menuOpen, setMenuOpen] = useState(false)
+  const [hoveredLink, setHoveredLink] = useState(null)
+
+  const navLinks = [
+    { to: '/', label: 'Home' },
+    { to: '/browse', label: 'Browse Projects' },
+    { to: '/dashboard', label: 'Designer Dashboard' },
+    { to: '/create', label: 'Create Project' },
+    { to: '/categories', label: 'Categories' },
+    { to: '/moderation', label: 'Moderation' },
+  ]
 
   return (
     <nav style={{
@@ -36,12 +46,24 @@ function Nav() {
       </div>
 
       <div className="desktop-nav" style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-        <Link to="/" style={{ color: '#333', textDecoration: 'none' }}>Home</Link>
-        <Link to="/browse" style={{ color: '#333', textDecoration: 'none' }}>Browse Projects</Link>
-        <Link to="/dashboard" style={{ color: '#333', textDecoration: 'none' }}>Designer Dashboard</Link>
-        <Link to="/create" style={{ color: '#333', textDecoration: 'none' }}>Create Project</Link>
-        <Link to="/categories" style={{ color: '#333', textDecoration: 'none' }}>Categories</Link>
-        <Link to="/moderation" style={{ color: '#333', textDecoration: 'none' }}>Moderation</Link>
+        {navLinks.map(link => (
+          <Link
+            key={link.to}
+            to={link.to}
+            style={{
+              color: '#333',
+              textDecoration: 'none',
+              padding: '0.25rem 0.5rem',
+              borderRadius: '4px',
+              background: hoveredLink === link.to ? 'rgba(0,0,0,0.1)' : 'transparent',
+              transition: 'background 0.2s',
+            }}
+            onMouseEnter={() => setHoveredLink(link.to)}
+            onMouseLeave={() => setHoveredLink(null)}
+          >
+            {link.label}
+          </Link>
+        ))}
       </div>
 
       <button
@@ -67,12 +89,16 @@ function Nav() {
           gap: '0.5rem',
           paddingTop: '0.5rem',
         }}>
-          <Link to="/" style={{ color: '#333', textDecoration: 'none' }} onClick={() => setMenuOpen(false)}>Home</Link>
-          <Link to="/browse" style={{ color: '#333', textDecoration: 'none' }} onClick={() => setMenuOpen(false)}>Browse Projects</Link>
-          <Link to="/dashboard" style={{ color: '#333', textDecoration: 'none' }} onClick={() => setMenuOpen(false)}>Designer Dashboard</Link>
-          <Link to="/create" style={{ color: '#333', textDecoration: 'none' }} onClick={() => setMenuOpen(false)}>Create Project</Link>
-          <Link to="/categories" style={{ color: '#333', textDecoration: 'none' }} onClick={() => setMenuOpen(false)}>Categories</Link>
-          <Link to="/moderation" style={{ color: '#333', textDecoration: 'none' }} onClick={() => setMenuOpen(false)}>Moderation</Link>
+          {navLinks.map(link => (
+            <Link
+              key={link.to}
+              to={link.to}
+              style={{ color: '#333', textDecoration: 'none' }}
+              onClick={() => setMenuOpen(false)}
+            >
+              {link.label}
+            </Link>
+          ))}
         </div>
       )}
     </nav>

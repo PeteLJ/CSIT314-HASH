@@ -4,7 +4,6 @@ import { Link } from 'react-router-dom'
 function HomePage() {
   const [currentSlide, setCurrentSlide] = useState(0)
   const [isTransitioning, setIsTransitioning] = useState(false)
-  const carouselRef = useRef(null)
 
   const styles = ['Modern', 'Scandinavian', 'Industrial', 'Minimalist', 'Classic', 'Contemporary']
   const featuredProjects = Array.from({ length: 10 }, (_, i) => ({
@@ -21,7 +20,6 @@ function HomePage() {
     const interval = setInterval(() => {
       setCurrentSlide(prev => {
         if (prev >= 9) {
-          // Go to clone (index 10), then reset to 0
           setIsTransitioning(true)
           return 10
         }
@@ -42,26 +40,14 @@ function HomePage() {
     }
   }, [currentSlide])
 
-  // Scroll to current slide
-  useEffect(() => {
-    if (carouselRef.current) {
-      const slideWidth = carouselRef.current.offsetWidth
-      carouselRef.current.scrollTo({
-        left: currentSlide * slideWidth,
-        behavior: isTransitioning ? 'smooth' : 'auto',
-      })
-    }
-  }, [currentSlide, isTransitioning])
+  const [btnHover, setBtnHover] = useState(false)
 
   return (
     <div style={{ width: '100%', minHeight: '100vh', boxSizing: 'border-box' }}>
-      {/* Hero section - sticky parallax */}
+      {/* Hero section */}
       <div style={{
-        position: 'sticky',
-        top: 0,
-        zIndex: 0,
         textAlign: 'center',
-        padding: '6rem 1rem',
+        padding: '2rem 1rem 4rem',
         background: 'linear-gradient(135deg, #2c2c2c, #4a4a4a, #1a1a1a)',
         minHeight: '100vh',
         display: 'flex',
@@ -70,19 +56,24 @@ function HomePage() {
         alignItems: 'center',
         width: '100%',
       }}>
-        <h1 style={{ fontSize: '3rem', marginBottom: '1rem', color: '#ffffff' }}>Welcome to HASH Designs</h1>
-        <p style={{ fontSize: '1.3rem', marginBottom: '2rem', color: '#ffffff' }}>
+        <h1 style={{ fontSize: '3rem', marginBottom: '1rem', color: '#ffffff', marginTop: '-4rem' }}>Welcome to HASH Designs</h1>
+        <p style={{ fontSize: '1.3rem', marginBottom: '3rem', color: '#ffffff' }}>
           Find the perfect interior designer for your renovation project.
         </p>
         <Link to="/browse" style={{
           padding: '0.75rem 2rem',
-          background: '#c4704b',
+          background: btnHover ? '#a85a3a' : '#c4704b',
           color: 'white',
           textDecoration: 'none',
           borderRadius: '24px',
           fontSize: '1.1rem',
-        }}>
-          Browse All Projects
+          marginTop: '1rem',
+          transition: 'background 0.3s',
+        }}
+        onMouseEnter={() => setBtnHover(true)}
+        onMouseLeave={() => setBtnHover(false)}
+        >
+          Browse Projects
         </Link>
       </div>
 
@@ -96,42 +87,49 @@ function HomePage() {
         {/* Featured Designs carousel */}
         <section style={{ marginBottom: '2rem', padding: '2rem 1rem' }}>
           <h2 style={{ textAlign: 'center' }}>Featured Designs</h2>
-          <p style={{ color: '#888', fontSize: '0.9rem', textAlign: 'center' }}>Auto-scrolling every 5 seconds</p>
           <div
-            ref={carouselRef}
             style={{
-              display: 'flex',
               overflow: 'hidden',
-              scrollSnapType: 'x mandatory',
               width: '100%',
-              aspectRatio: '16 / 9',
               maxWidth: '800px',
               margin: '0 auto',
+              aspectRatio: '16 / 9',
+              position: 'relative',
             }}
           >
-            {slides.map((project, i) => (
-              <div
-                key={i}
-                style={{
-                  minWidth: '100%',
-                  scrollSnapAlign: 'start',
-                  border: '1px dashed rgba(255,255,255,0.3)',
-                  padding: '2rem',
-                  textAlign: 'center',
-                  boxSizing: 'border-box',
-                  background: 'rgba(255, 255, 255, 0.08)',
-                  borderRadius: '12px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}
-              >
-                <h3>{project.title}</h3>
-                <p>Style: {project.style}</p>
-                <p><em>Image placeholder - add project image here</em></p>
-              </div>
-            ))}
+            <div
+              style={{
+                display: 'flex',
+                width: `${slides.length * 100}%`,
+                transform: `translateX(-${(currentSlide / slides.length) * 100}%)`,
+                transition: isTransitioning ? 'transform 0.5s ease-in-out' : 'none',
+                height: '100%',
+              }}
+            >
+              {slides.map((project, i) => (
+                <div
+                  key={i}
+                  style={{
+                    width: `${100 / slides.length}%`,
+                    flexShrink: 0,
+                    border: '1px dashed rgba(255,255,255,0.3)',
+                    padding: '2rem',
+                    textAlign: 'center',
+                    boxSizing: 'border-box',
+                    background: 'rgba(255, 255, 255, 0.08)',
+                    borderRadius: '12px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }}
+                >
+                  <h3>{project.title}</h3>
+                  <p>Style: {project.style}</p>
+                  <p><em>Image placeholder - add project image here</em></p>
+                </div>
+              ))}
+            </div>
           </div>
           <div style={{ textAlign: 'center', marginTop: '0.5rem' }}>
             {featuredProjects.map((_, i) => (
@@ -201,6 +199,7 @@ function HomePage() {
           borderTop: '1px solid rgba(255,255,255,0.1)',
           color: '#888',
           fontSize: '0.9rem',
+          background: '#1A1A1A',
         }}>
           <p>Placeholder footer text - add your content here</p>
           <p style={{ marginTop: '0.5rem' }}>HASH Designs &copy; 2026</p>
