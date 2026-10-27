@@ -2,6 +2,7 @@
 # Interior Design Matching Web Application
 Mini-FYP group project for CSIT314
 
+Website (GitHub Pages): https://petelj.github.io/CSIT314-HASH/
 
 ## Tech Stack
 
