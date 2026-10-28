@@ -1,4 +1,4 @@
-﻿from rest_framework import generics, permissions
+from rest_framework import generics, permissions
 from .models import Category
 from .serializers import CategorySerializer
 

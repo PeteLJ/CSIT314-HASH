@@ -1,4 +1,4 @@
-﻿from django.db.models import Count
+from django.db.models import Count
 from django.db.models.functions import TruncDate, TruncWeek, TruncMonth
 from django.contrib.auth import get_user_model
 from rest_framework import generics, permissions, status

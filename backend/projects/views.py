@@ -1,4 +1,4 @@
-﻿from django.db.models import Count
+from django.db.models import Count
 from django.db.models.functions import TruncDate, TruncWeek, TruncMonth
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
