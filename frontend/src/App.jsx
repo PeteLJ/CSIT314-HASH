@@ -1,4 +1,4 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { HashRouter, Routes, Route, Link } from 'react-router-dom'
 import HomePage from './pages/HomePage'
 import BrowsePage from './pages/BrowsePage'
@@ -9,6 +9,8 @@ import CreatePage from './pages/CreatePage'
 import CategoriesPage from './pages/CategoriesPage'
 import ModerationPage from './pages/ModerationPage'
 import './App.css'
+
+const logoUrl = `${import.meta.env.BASE_URL}logo.png`
 
 function Nav() {
   const [menuOpen, setMenuOpen] = useState(false)
@@ -32,17 +34,14 @@ function Nav() {
       zIndex: 1000,
       background: 'rgba(234, 230, 223, 0.8)',
       backdropFilter: 'blur(10px)',
-      padding: '0.75rem 1rem',
+      padding: '0.25rem 1rem',
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
       flexWrap: 'wrap',
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-        <div style={{ width: '40px', height: '40px', border: '2px dashed #999', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: '#555' }}>
-          LOGO
-        </div>
-        <span style={{ fontWeight: 'bold', color: '#333' }}>HASH Designs</span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginLeft: '0.5rem' }}>
+        <img src={logoUrl} alt="HASH Designs" style={{ width: '64px', height: '64px', objectFit: 'contain' }} />
       </div>
 
       <div className="desktop-nav" style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
@@ -126,3 +125,4 @@ function App() {
 }
 
 export default App
+

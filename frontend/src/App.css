@@ -55,7 +55,7 @@ p {
 }
 
 /* Mobile: hide desktop nav, show hamburger */
-@media (max-width: 768px) {
+@media (max-width: 1050px) {
   .desktop-nav {
     display: none !important;
   }

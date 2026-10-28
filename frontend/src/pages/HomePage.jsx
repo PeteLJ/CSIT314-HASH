@@ -1,9 +1,9 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 
 function HomePage() {
   const [currentSlide, setCurrentSlide] = useState(0)
-  const [isTransitioning, setIsTransitioning] = useState(false)
+  const [isTransitioning, setIsTransitioning] = useState(true)
 
   const styles = ['Modern', 'Scandinavian', 'Industrial', 'Minimalist', 'Classic', 'Contemporary']
   const featuredProjects = Array.from({ length: 10 }, (_, i) => ({
@@ -23,6 +23,7 @@ function HomePage() {
           setIsTransitioning(true)
           return 10
         }
+        setIsTransitioning(true)
         return prev + 1
       })
     }, 5000)
@@ -56,8 +57,8 @@ function HomePage() {
         alignItems: 'center',
         width: '100%',
       }}>
-        <h1 style={{ fontSize: '3rem', marginBottom: '1rem', color: '#ffffff', marginTop: '-4rem' }}>Welcome to HASH Designs</h1>
-        <p style={{ fontSize: '1.3rem', marginBottom: '3rem', color: '#ffffff' }}>
+        <h1 style={{ fontSize: '3rem', marginBottom: '1rem', color: '#ffffff', marginTop: '-6rem' }}>Welcome to HASH Designs</h1>
+        <p style={{ fontSize: '1.3rem', marginBottom: '15rem', color: '#ffffff' }}>
           Find the perfect interior designer for your renovation project.
         </p>
         <Link to="/browse" style={{
@@ -67,7 +68,7 @@ function HomePage() {
           textDecoration: 'none',
           borderRadius: '24px',
           fontSize: '1.1rem',
-          marginTop: '1rem',
+          marginTop: '2rem',
           transition: 'background 0.3s',
         }}
         onMouseEnter={() => setBtnHover(true)}
@@ -135,7 +136,10 @@ function HomePage() {
             {featuredProjects.map((_, i) => (
               <span
                 key={i}
-                onClick={() => setCurrentSlide(i)}
+                onClick={() => {
+                  setIsTransitioning(true)
+                  setCurrentSlide(i)
+                }}
                 style={{
                   display: 'inline-block',
                   width: '10px',
@@ -199,10 +203,10 @@ function HomePage() {
           borderTop: '1px solid rgba(255,255,255,0.1)',
           color: '#888',
           fontSize: '0.9rem',
-          background: '#1A1A1A',
+          background: '#EAE6DF',
         }}>
-          <p>Placeholder footer text - add your content here</p>
-          <p style={{ marginTop: '0.5rem' }}>HASH Designs &copy; 2026</p>
+          <p style={{ color: '#333' }}>Placeholder footer text - add your content here</p>
+          <p style={{ marginTop: '0.5rem', color: '#333' }}>HASH Designs &copy; 2026</p>
         </footer>
       </div>
     </div>
