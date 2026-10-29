@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { apiGet, apiPatch } from '../api/client'
 
 // Review and flag inappropriate project content
@@ -29,7 +29,7 @@ function ModerationPage() {
       <h1>Moderate Flagged Project Content</h1>
       <p>Review and remove projects that customers have flagged.</p>
       {loading ? <p>Loading...</p> : (
-        <table border="1" cellPadding="8" style={{ borderCollapse: 'collapse', width: '100%' }}>
+        <table border="1" cellPadding="8" style={{ borderCollapse: 'collapse', borderColor: 'rgba(255,255,255,0.3)', width: '100%' }}>
           <thead>
             <tr>
               <th>ID</th><th>Title</th><th>Style</th><th>Status</th><th>Designer</th><th>Action</th>

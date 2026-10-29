@@ -29,9 +29,15 @@ for i in range(100):
     )
     customers.append(c)
 
-for i in range(20):
+designer_names = [
+    'Wei Ming', 'Sarah', 'Jun Hao', 'Emily', 'Ahmad',
+    'Jessica', 'Michael', 'Priya', 'David', 'Aisyah',
+    'Rachel', 'James', 'Mei Ling', 'Robert', 'Fatimah',
+    'Kevin', 'Lisa', 'Daniel', 'Amanda', 'Ryan',
+]
+for name in designer_names:
     d = User.objects.create_user(
-        username=f'designer{i}',
+        username=name,
         password='testpass123',
         role=User.Role.INTERIOR_DESIGNER,
     )
@@ -45,22 +51,34 @@ statuses = [InteriorDesignProject.Status.DRAFT, InteriorDesignProject.Status.PUB
             InteriorDesignProject.Status.ARCHIVED]
 projects = []
 for i in range(100):
+    room_type = random.choice(room_types)
+    # Realistic cost ranges per room type
+    cost_ranges = {
+        'BATHROOM': (12000, 25000),
+        'KITCHEN': (12000, 40000),
+        'BEDROOM': (12000, 35000),
+        'LIVING_ROOM': (15000, 50000),
+        'WHOLE_UNIT': (30000, 150000),
+    }
+    lo, hi = cost_ranges[room_type]
+    cost = random.randint(lo, hi)
+    style = random.choice(styles)
     p = InteriorDesignProject.objects.create(
         designer=random.choice(designers),
-        title=f'Design Project {i}',
-        description=f'A beautiful {random.choice(styles).lower()} design project.',
-        style=random.choice(styles),
-        room_type=random.choice(room_types),
-        budget_min=random.choice([5000, 10000, 15000, 20000]),
-        budget_max=random.choice([30000, 40000, 50000, 60000]),
+        title=f'Interior Design {i}',
+        description=f'A beautiful {style.lower()} design project.',
+        style=style,
+        room_type=room_type,
+        budget_min=cost,
+        budget_max=cost + random.randint(0, 5000),
         status=random.choice(statuses),
     )
     projects.append(p)
 
-# View events - spread across the last 90 days
+# View events - spread across the last 90 days (50-500 views per project for realism)
 now = timezone.now()
 for p in projects:
-    for _ in range(random.randint(5, 30)):
+    for _ in range(random.randint(50, 500)):
         days_ago = random.randint(0, 89)
         InterestEvent.objects.create(
             project=p,
@@ -68,10 +86,12 @@ for p in projects:
             occurred_at=now - timedelta(days=days_ago, hours=random.randint(0, 23)),
         )
 
-# Shortlist events - spread across the last 90 days
-for c in customers:
-    for _ in range(random.randint(0, 10)):
-        p = random.choice(projects)
+# Shortlist events - proportional to views (realistic: ~5-15% of views become shortlists)
+for p in projects:
+    view_count = InterestEvent.objects.filter(project=p, event_type=InterestEvent.EventType.VIEW).count()
+    shortlist_count = max(0, int(view_count * random.uniform(0.05, 0.15)))
+    shortlisting_customers = random.sample(customers, min(shortlist_count, len(customers)))
+    for c in shortlisting_customers:
         try:
             InterestEvent.objects.create(
                 project=p,

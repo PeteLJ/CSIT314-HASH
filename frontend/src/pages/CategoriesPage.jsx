@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { apiGet, apiPost, apiDelete } from '../api/client'
 
 // Manage project categories (add/delete)

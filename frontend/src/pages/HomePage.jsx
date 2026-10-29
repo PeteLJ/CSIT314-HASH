@@ -187,11 +187,11 @@ function HomePage() {
             </li>
             <li style={{ display: 'flex', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
               <span style={{ fontWeight: 'bold', marginRight: '0.75rem', color: '#c4704b', minWidth: '24px' }}>3.</span>
-              <span>Find interior designers that match your needs</span>
+              <span>Find interior designs that match your needs</span>
             </li>
             <li style={{ display: 'flex', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
               <span style={{ fontWeight: 'bold', marginRight: '0.75rem', color: '#c4704b', minWidth: '24px' }}>4.</span>
-              <span>Track interest in your own projects (for designers)</span>
+              <span>Save your favourite designs for later reference</span>
             </li>
           </ol>
         </section>

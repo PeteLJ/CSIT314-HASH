@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { apiGet } from '../api/client'
 
@@ -20,14 +20,14 @@ function DashboardPage() {
   return (
     <div>
       <h1>Portfolio Interest Overview</h1>
-      <div style={{ display: 'flex', gap: '2rem', marginBottom: '1rem' }}>
+      <div style={{ display: 'flex', gap: '2rem', marginBottom: '1rem', justifyContent: 'center' }}>
         <div><strong>Total Views:</strong> {data.total_views}</div>
         <div><strong>Total Shortlists:</strong> {data.total_shortlists}</div>
         <div><strong>Projects:</strong> {data.project_count}</div>
       </div>
       <h2>Ranked Projects</h2>
       {data.projects.length === 0 ? <p>No projects found.</p> : (
-        <table border="1" cellPadding="8" style={{ borderCollapse: 'collapse' }}>
+        <table border="1" cellPadding="8" style={{ borderCollapse: 'collapse', borderColor: 'rgba(255,255,255,0.3)', margin: '0 auto' }}>
           <thead>
             <tr>
               <th>Rank</th><th>Title</th><th>Style</th><th>Status</th><th>Views</th><th>Shortlists</th>

@@ -1,4 +1,4 @@
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.db.models.functions import TruncDate, TruncWeek, TruncMonth
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
@@ -10,7 +10,6 @@ from .serializers import InteriorDesignProjectSerializer, InterestEventSerialize
 # --- US-31: Browse Design Projects ---
 # Guide: ProjectController.getProjectsForBrowse(), ProjectServiceImpl.fetchAllProjects()
 
-# Browse all published projects, create new project
 class ProjectController(generics.ListCreateAPIView):
     """Browse all published projects. Create a new project (draft or published)."""
     serializer_class = InteriorDesignProjectSerializer
@@ -20,12 +19,17 @@ class ProjectController(generics.ListCreateAPIView):
         queryset = InteriorDesignProject.objects.filter(
             status=InteriorDesignProject.Status.PUBLISHED
         )
-        # Search and filter (US-03)
+        # Search and filter (US-03: search by keyword, filter by style, room type, budget)
+        search = self.request.query_params.get('search')
         style = self.request.query_params.get('style')
         room_type = self.request.query_params.get('room_type')
         budget_min = self.request.query_params.get('budget_min')
         budget_max = self.request.query_params.get('budget_max')
 
+        if search:
+            queryset = queryset.filter(
+                Q(title__icontains=search) | Q(style__icontains=search) | Q(room_type__icontains=search)
+            )
         if style:
             queryset = queryset.filter(style__iexact=style)
         if room_type:
@@ -33,7 +37,7 @@ class ProjectController(generics.ListCreateAPIView):
         if budget_min:
             queryset = queryset.filter(budget_min__gte=budget_min)
         if budget_max:
-            queryset = queryset.filter(budget_max__lte=budget_max)
+            queryset = queryset.filter(budget_min__lte=budget_max)
 
         return queryset
 
@@ -44,14 +48,12 @@ class ProjectController(generics.ListCreateAPIView):
 # --- US-35: View Project Details ---
 # Guide: ProjectController.getProjectDetails(), ProjectServiceImpl.fetchProjectsById()
 
-# Get, update, or delete a single project
 class ProjectDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = InteriorDesignProject.objects.all()
     serializer_class = InteriorDesignProjectSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
-# Toggle publication status (draft/published/archived)
 class ProjectPublishView(APIView):
     """Toggle publication status: DRAFT -> PUBLISHED -> ARCHIVED."""
     permission_classes = [permissions.IsAuthenticated]
@@ -71,7 +73,6 @@ class ProjectPublishView(APIView):
         return Response({'id': project.id, 'status': project.status})
 
 
-# Record a view event when customer opens project detail
 class RecordViewView(APIView):
     """Records a VIEW interest event. Called when a customer opens a project detail page."""
     permission_classes = [permissions.AllowAny]
@@ -87,7 +88,6 @@ class RecordViewView(APIView):
 
 # --- Interest Events (shortlists/favourites) ---
 
-# List and create interest events (shortlists/favourites)
 class InterestEventListView(generics.ListCreateAPIView):
     serializer_class = InterestEventSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -104,7 +104,6 @@ class InterestEventListView(generics.ListCreateAPIView):
         serializer.save(customer=self.request.user)
 
 
-# Remove a shortlist/favourite
 class InterestEventDetailView(generics.DestroyAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -115,11 +114,23 @@ class InterestEventDetailView(generics.DestroyAPIView):
 # --- Analytics endpoints ---
 
 class PortfolioInterestView(APIView):
-    """Returns total views, total shortlists, and ranked projects for the logged-in designer."""
-    permission_classes = [permissions.IsAuthenticated]
+    """Returns total views, total shortlists, and ranked projects for a designer."""
+    permission_classes = [permissions.AllowAny]
 
     def get(self, request):
-        designer = request.user
+        designer_id = request.query_params.get('designer_id')
+        if designer_id:
+            try:
+                designer = User.objects.get(pk=designer_id)
+            except User.DoesNotExist:
+                return Response({'error': 'Designer not found'}, status=status.HTTP_404_NOT_FOUND)
+        elif request.user.is_authenticated:
+            designer = request.user
+        else:
+            designer = User.objects.filter(role=User.Role.INTERIOR_DESIGNER).first()
+        if not designer:
+            return Response({'error': 'No designer found'}, status=status.HTTP_404_NOT_FOUND)
+
         projects = InteriorDesignProject.objects.filter(designer=designer)
         projects_data = []
         total_views = 0
@@ -151,7 +162,7 @@ class PortfolioInterestView(APIView):
 
 class TrendChartView(APIView):
     """Returns view and shortlist counts bucketed by period for a single project."""
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
 
     def get(self, request, pk):
         try:

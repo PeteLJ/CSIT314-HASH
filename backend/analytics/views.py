@@ -100,8 +100,8 @@ class TrendChartView(APIView):
         for p in all_periods:
             series.append({
                 'period': p,
-                'views': view_map.get(p, 0),
-                'shortlists': shortlist_map.get(p, 0),
+                'view_count': view_map.get(p, 0),
+                'shortlist_count': shortlist_map.get(p, 0),
             })
 
         return Response({

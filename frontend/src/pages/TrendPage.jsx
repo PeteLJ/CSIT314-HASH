@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { Line } from 'react-chartjs-2'
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js'
@@ -29,13 +29,13 @@ function TrendPage() {
     datasets: [
       {
         label: 'Views',
-        data: data.series.map(s => s.views),
+        data: data.series.map(s => s.view_count),
         borderColor: 'rgb(75, 192, 192)',
         tension: 0.1,
       },
       {
         label: 'Shortlists',
-        data: data.series.map(s => s.shortlists),
+        data: data.series.map(s => s.shortlist_count),
         borderColor: 'rgb(255, 99, 132)',
         tension: 0.1,
       },
@@ -44,7 +44,7 @@ function TrendPage() {
 
   return (
     <div>
-      <Link to="/dashboard">? Back to Dashboard</Link>
+      <Link to="/dashboard">Back to Dashboard</Link>
       <h1>Interest Trend: {data.project_title}</h1>
       <div style={{ marginBottom: '1rem' }}>
         <label>Period: </label>
