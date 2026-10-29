@@ -1,4 +1,4 @@
-﻿const API_BASE = 'http://127.0.0.1:8000/api'
+﻿const API_BASE = 'https://petelj.pythonanywhere.com/api'
 
 // Helper to GET data from the backend API
 export async function apiGet(endpoint) {
@@ -35,3 +35,4 @@ export async function apiDelete(endpoint) {
   if (!res.ok) throw new Error(`DELETE ${endpoint} failed: ${res.status}`)
   return res.status === 204 ? null : res.json()
 }
+
