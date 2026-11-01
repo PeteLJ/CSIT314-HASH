@@ -12,10 +12,8 @@ function HomePage() {
     style: styles[i % styles.length],
   }))
 
-  // 10 slides + 1 clone of first slide at the end for smooth wrap
   const slides = [...featuredProjects, featuredProjects[0]]
 
-  // Auto-scroll carousel every 5 seconds
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentSlide(prev => {
@@ -30,7 +28,6 @@ function HomePage() {
     return () => clearInterval(interval)
   }, [])
 
-  // Handle transition reset after reaching clone
   useEffect(() => {
     if (currentSlide === 10) {
       const timer = setTimeout(() => {
@@ -45,11 +42,17 @@ function HomePage() {
 
   return (
     <div style={{ width: '100%', minHeight: '100vh', boxSizing: 'border-box' }}>
-      {/* Hero section */}
+      {/* Hero section with background image */}
       <div style={{
+        position: 'sticky',
+        top: 0,
+        zIndex: 0,
         textAlign: 'center',
-        padding: '2rem 1rem 4rem',
-        background: 'linear-gradient(135deg, #2c2c2c, #4a4a4a, #1a1a1a)',
+        padding: '6rem 1rem',
+        background: `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url(${import.meta.env.BASE_URL}hero.jpg)`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed',
         minHeight: '100vh',
         display: 'flex',
         flexDirection: 'column',
@@ -58,7 +61,7 @@ function HomePage() {
         width: '100%',
       }}>
         <h1 style={{ fontSize: '3rem', marginBottom: '1rem', color: '#ffffff', marginTop: '-6rem' }}>Welcome to HASH Designs</h1>
-        <p style={{ fontSize: '1.3rem', marginBottom: '15rem', color: '#ffffff' }}>
+        <p style={{ fontSize: '1.3rem', marginBottom: '17rem', color: '#ffffff' }}>
           Find the perfect interior designer for your renovation project.
         </p>
         <Link to="/browse" style={{
@@ -96,6 +99,7 @@ function HomePage() {
               margin: '0 auto',
               aspectRatio: '16 / 9',
               position: 'relative',
+              borderRadius: '12px',
             }}
           >
             <div

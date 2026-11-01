@@ -1,4 +1,4 @@
-import os
+﻿import os
 import django
 import random
 from datetime import timedelta
@@ -9,14 +9,14 @@ django.setup()
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from projects.models import InteriorDesignProject, InterestEvent
-from categories.models import Category
+from categories.models import ProjectCategory
 
 User = get_user_model()
 
 # Categories
 categories = ['Modern', 'Scandinavian', 'Industrial', 'Minimalist', 'Classic', 'Contemporary']
 for name in categories:
-    Category.objects.get_or_create(name=name)
+    ProjectCategory.objects.get_or_create(name=name)
 
 # Users
 customers = []
@@ -75,36 +75,44 @@ for i in range(100):
     )
     projects.append(p)
 
-# View events - spread across the last 90 days (50-500 views per project for realism)
+# View events - spread across the last 90 days (20-100 views per project for realism)
+# Only published projects get view events (drafts have 0 views/shortlists)
 now = timezone.now()
-for p in projects:
-    for _ in range(random.randint(50, 500)):
-        days_ago = random.randint(0, 89)
-        InterestEvent.objects.create(
+local_now = timezone.localtime(now)
+published_projects = [p for p in projects if p.status != InteriorDesignProject.Status.DRAFT]
+view_events = []
+for p in published_projects:
+    for _ in range(random.randint(20, 100)):
+        days_ago = random.randint(0, 29)
+        occurred = local_now - timedelta(days=days_ago, hours=random.randint(0, 23))
+        view_events.append(InterestEvent(
             project=p,
             event_type=InterestEvent.EventType.VIEW,
-            occurred_at=now - timedelta(days=days_ago, hours=random.randint(0, 23)),
-        )
+            occurred_at=occurred,
+        ))
+InterestEvent.objects.bulk_create(view_events)
 
 # Shortlist events - proportional to views (realistic: ~5-15% of views become shortlists)
-for p in projects:
+# Only published projects get shortlist events
+shortlist_events = []
+for p in published_projects:
     view_count = InterestEvent.objects.filter(project=p, event_type=InterestEvent.EventType.VIEW).count()
     shortlist_count = max(0, int(view_count * random.uniform(0.05, 0.15)))
     shortlisting_customers = random.sample(customers, min(shortlist_count, len(customers)))
     for c in shortlisting_customers:
-        try:
-            InterestEvent.objects.create(
-                project=p,
-                customer=c,
-                event_type=InterestEvent.EventType.SHORTLIST,
-                occurred_at=now - timedelta(days=random.randint(0, 89)),
-            )
-        except Exception:
-            pass
+        occurred = local_now - timedelta(days=random.randint(0, 29), hours=random.randint(0, 23))
+        shortlist_events.append(InterestEvent(
+            project=p,
+            customer=c,
+            event_type=InterestEvent.EventType.SHORTLIST,
+            occurred_at=occurred,
+        ))
+InterestEvent.objects.bulk_create(shortlist_events)
 
 print('Test data created successfully.')
 print(f'Users: {User.objects.count()}')
 print(f'Projects: {InteriorDesignProject.objects.count()}')
 print(f'View events: {InterestEvent.objects.filter(event_type=InterestEvent.EventType.VIEW).count()}')
 print(f'Shortlist events: {InterestEvent.objects.filter(event_type=InterestEvent.EventType.SHORTLIST).count()}')
-print(f'Categories: {Category.objects.count()}')
+print(f'Categories: {ProjectCategory.objects.count()}')
+

@@ -1,15 +1,19 @@
-from rest_framework import generics, permissions
-from .models import Category
-from .serializers import CategorySerializer
+﻿from rest_framework import generics, permissions
+from .models import ProjectCategory
+from .serializers import ProjectCategorySerializer
 
 
-class CategoryListView(generics.ListCreateAPIView):
-    queryset = Category.objects.all()
-    serializer_class = CategorySerializer
+class ProjectCategoryListView(generics.ListCreateAPIView):
+    queryset = ProjectCategory.objects.all()
+    serializer_class = ProjectCategorySerializer
     permission_classes = [permissions.AllowAny]
 
 
-class CategoryDetailView(generics.DestroyAPIView):
-    queryset = Category.objects.all()
-    serializer_class = CategorySerializer
+class ProjectCategoryDetailView(generics.DestroyAPIView):
+    queryset = ProjectCategory.objects.all()
+    serializer_class = ProjectCategorySerializer
     permission_classes = [permissions.AllowAny]
+
+# --- Alias class for naming guide consistency ---
+# Guide: CategoryManagementController
+CategoryManagementController = ProjectCategoryListView

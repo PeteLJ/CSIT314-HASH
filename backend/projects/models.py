@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 from django.conf import settings
 
 
@@ -74,7 +75,7 @@ class InterestEvent(models.Model):
         blank=True,
         related_name='shortlist_events',
     )
-    occurred_at = models.DateTimeField(auto_now_add=True)
+    occurred_at = models.DateTimeField(default=timezone.now)
     event_type = models.CharField(
         max_length=16,
         choices=EventType.choices,

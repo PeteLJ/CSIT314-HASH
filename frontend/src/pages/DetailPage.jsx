@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+﻿import { useState, useEffect, useRef } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { apiGet, apiPost } from '../api/client'
 
@@ -11,7 +11,6 @@ function DetailPage() {
   const viewRecorded = useRef(false)
 
   useEffect(() => {
-    // Record view only once (prevent StrictMode double-execution)
     if (!viewRecorded.current) {
       viewRecorded.current = true
       apiPost(`/projects/${id}/record-view/`, {}).catch(() => {})
@@ -27,17 +26,47 @@ function DetailPage() {
   if (loading) return <p>Loading...</p>
   if (!project) return <p>Project not found.</p>
 
+  const roomTypeLabel = project.room_type
+    ? project.room_type.split('_').map(w => w.charAt(0) + w.slice(1).toLowerCase()).join(' ')
+    : 'N/A'
+
   return (
-    <div>
-      <Link to="/">Back to Browse</Link>
-      <h1>{project.title}</h1>
-      <p><strong>Style:</strong> {project.style}</p>
-      <p><strong>Cost:</strong> ${Number(project.budget_min).toLocaleString()}</p>
-      <p><strong>Designer:</strong> {project.designer_name}</p>
-      <p><strong>Room Type:</strong> {project.room_type ? project.room_type.split('_').map(w => w.charAt(0) + w.slice(1).toLowerCase()).join(' ') : 'N/A'}</p>
-      <p>{project.description}</p>
-      <p>Views: {viewCount} | Shortlists: {shortlistCount}</p>
-      <p><em>Image placeholder (to be added later)</em></p>
+    <div style={{ padding: "0 2rem", maxWidth: '800px', margin: '0 auto' }}>
+      <Link to="/browse" style={{ color: '#64b5f6', textDecoration: 'none' }}>Back to Browse</Link>
+      <div style={{
+        display: 'flex',
+        gap: '2rem',
+        marginTop: '1rem',
+        flexWrap: 'wrap',
+      }}>
+        {/* Image placeholder */}
+        <div style={{
+          flex: '1 1 300px',
+          aspectRatio: '16 / 9',
+          background: 'rgba(255, 255, 255, 0.05)',
+          borderRadius: '12px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: '#888',
+          border: '1px dashed rgba(255,255,255,0.3)',
+        }}>
+          Image placeholder
+        </div>
+        {/* Details */}
+        <div style={{ flex: '1 1 300px' }}>
+          <h1 style={{ marginTop: 0 }}>{project.title}</h1>
+          <p><strong>Style:</strong> {project.style}</p>
+          <p><strong>Cost:</strong> ${Number(project.budget_min).toLocaleString()}</p>
+          <p><strong>Designer:</strong> {project.designer_name}</p>
+          <p><strong>Room Type:</strong> {roomTypeLabel}</p>
+          <p style={{ marginTop: '1rem' }}>{project.description}</p>
+          <div style={{ marginTop: '1rem', padding: '0.75rem', background: 'rgba(255,255,255,0.05)', borderRadius: '8px' }}>
+            <span>Views: {viewCount}</span>
+            <span style={{ marginLeft: '1.5rem' }}>Shortlists: {shortlistCount}</span>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

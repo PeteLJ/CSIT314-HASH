@@ -1,4 +1,7 @@
-﻿const API_BASE = 'https://petelj.pythonanywhere.com/api'
+﻿// API base URL - uses localhost in development, PythonAnywhere in production
+const API_BASE = window.location.hostname === 'localhost'
+  ? 'http://127.0.0.1:8000/api'
+  : 'https://petelj.pythonanywhere.com/api'
 
 // Helper to GET data from the backend API
 export async function apiGet(endpoint) {
@@ -35,4 +38,3 @@ export async function apiDelete(endpoint) {
   if (!res.ok) throw new Error(`DELETE ${endpoint} failed: ${res.status}`)
   return res.status === 204 ? null : res.json()
 }
-

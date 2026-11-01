@@ -49,26 +49,26 @@ function BrowsePage() {
   const roomTypes = ['LIVING_ROOM', 'BEDROOM', 'KITCHEN', 'BATHROOM', 'WHOLE_UNIT']
 
   return (
-    <div>
+    <div style={{ width: '100%', boxSizing: 'border-box', padding: '0 2rem' }}>
       <h1>Browse Design Projects</h1>
       {FEATURES.SEARCH_FILTER && (
-        <div style={{ marginBottom: '1rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+        <div style={{ marginBottom: '1.5rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
           <input
             type="text"
             placeholder="Search by keyword..."
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            style={{ padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc', minWidth: '200px' }}
+            style={{ padding: '0.5rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.3)', minWidth: '200px', background: 'rgba(255,255,255,0.05)', color: '#e0e0e0' }}
           />
-          <select value={styleFilter} onChange={e => setStyleFilter(e.target.value)}>
+          <select value={styleFilter} onChange={e => setStyleFilter(e.target.value)} style={{ padding: '0.5rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.3)', background: 'rgba(255,255,255,0.05)', color: '#e0e0e0' }}>
             <option value="">All Styles</option>
             {styles.map(s => <option key={s} value={s}>{s}</option>)}
           </select>
-          <select value={roomTypeFilter} onChange={e => setRoomTypeFilter(e.target.value)}>
+          <select value={roomTypeFilter} onChange={e => setRoomTypeFilter(e.target.value)} style={{ padding: '0.5rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.3)', background: 'rgba(255,255,255,0.05)', color: '#e0e0e0' }}>
             <option value="">All Room Types</option>
             {roomTypes.map(r => <option key={r} value={r}>{r.split('_').map(w => w.charAt(0) + w.slice(1).toLowerCase()).join(' ')}</option>)}
           </select>
-          <select value={budgetFilter} onChange={e => setBudgetFilter(e.target.value)}>
+          <select value={budgetFilter} onChange={e => setBudgetFilter(e.target.value)} style={{ padding: '0.5rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.3)', background: 'rgba(255,255,255,0.05)', color: '#e0e0e0' }}>
             <option value="">All Budgets</option>
             <option value="under20k">Under $20k</option>
             <option value="20k-40k">$20k - $40k</option>
@@ -77,15 +77,48 @@ function BrowsePage() {
           </select>
         </div>
       )}
-      {loading ? <p>Loading...</p> : (
-        <ul>
+      {loading ? <p>Loading...</p> : projects.length === 0 ? (
+        <p>No projects found. Make sure the backend is running.</p>
+      ) : (
+        <div className='card-grid'>
           {projects.map(p => (
-            <li key={p.id} style={{ marginBottom: '0.5rem' }}>
-              <Link to={`/project/${p.id}`}>{p.title}</Link> - {p.style} by {p.designer_name}
-              {p.room_type && <span> | {ROOM_TYPE_LABELS[p.room_type] || p.room_type.split('_').map(w => w.charAt(0) + w.slice(1).toLowerCase()).join(' ')}</span>}
-            </li>
+            <div key={p.id} style={{
+              background: 'rgba(255, 255, 255, 0.08)',
+              borderRadius: '12px',
+              overflow: 'hidden',
+              border: '1px solid rgba(255,255,255,0.15)',
+            }}>
+              {/* Image placeholder */}
+              <div style={{
+                width: '100%',
+                aspectRatio: '16 / 9',
+                background: 'rgba(255, 255, 255, 0.05)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#888',
+                fontSize: '0.9rem',
+              }}>
+                Image placeholder
+              </div>
+              {/* Details */}
+              <div style={{ padding: '1rem' }}>
+                <Link to={`/project/${p.id}`} style={{ color: '#64b5f6', textDecoration: 'none', fontSize: '1.1rem', fontWeight: 'bold' }}>
+                  {p.title}
+                </Link>
+                <p style={{ margin: '0.25rem 0', color: '#ccc', fontSize: '0.9rem' }}>
+                  {p.style} {p.room_type && `| ${p.room_type.split('_').map(w => w.charAt(0) + w.slice(1).toLowerCase()).join(' ')}`}
+                </p>
+                <p style={{ margin: '0.25rem 0', color: '#ccc', fontSize: '0.9rem' }}>
+                  by {p.designer_name}
+                </p>
+                <p style={{ margin: '0.25rem 0', color: '#fff', fontWeight: 'bold' }}>
+                  ${Number(p.budget_min).toLocaleString()}
+                </p>
+              </div>
+            </div>
           ))}
-        </ul>
+        </div>
       )}
     </div>
   )

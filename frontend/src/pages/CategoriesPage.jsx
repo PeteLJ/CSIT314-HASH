@@ -1,7 +1,6 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { apiGet, apiPost, apiDelete } from '../api/client'
 
-// Manage project categories (add/delete)
 function CategoriesPage() {
   const [categories, setCategories] = useState([])
   const [loading, setLoading] = useState(true)
@@ -39,20 +38,24 @@ function CategoriesPage() {
     }
   }
 
+  const inputStyle = { padding: '0.5rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.3)', background: 'rgba(255,255,255,0.05)', color: '#e0e0e0' }
+
   return (
-    <div>
+    <div style={{ padding: "0 2rem", maxWidth: '600px', margin: '0 auto' }}>
       <h1>Manage Project Categories</h1>
-      <form onSubmit={handleCreate} style={{ marginBottom: '1rem' }}>
-        <input placeholder="Category name" value={newName} onChange={e => setNewName(e.target.value)} required />
-        <input placeholder="Description" value={newDesc} onChange={e => setNewDesc(e.target.value)} style={{ marginLeft: '0.5rem' }} />
-        <button type="submit" style={{ marginLeft: '0.5rem' }}>Add</button>
+      <form onSubmit={handleCreate} style={{ marginBottom: '1.5rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+        <input placeholder="Category name" value={newName} onChange={e => setNewName(e.target.value)} required style={inputStyle} />
+        <input placeholder="Description" value={newDesc} onChange={e => setNewDesc(e.target.value)} style={inputStyle} />
+        <button type="submit" style={{ padding: '0.5rem 1rem', borderRadius: '8px', border: 'none', background: '#c4704b', color: 'white', cursor: 'pointer' }}>Add</button>
       </form>
       {loading ? <p>Loading...</p> : (
-        <ul>
+        <ul style={{ listStyle: 'none', padding: 0 }}>
           {categories.map(c => (
-            <li key={c.id}>
-              <strong>{c.name}</strong> - {c.description}
-              <button onClick={() => handleDelete(c.id)} style={{ marginLeft: '1rem', color: 'red' }}>Delete</button>
+            <li key={c.id} style={{ marginBottom: '0.5rem', padding: '0.75rem', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <strong>{c.name}</strong> â€” {c.description}
+              </div>
+              <button onClick={() => handleDelete(c.id)} style={{ color: '#ff6b6b', background: 'none', border: '1px solid #ff6b6b', borderRadius: '4px', padding: '0.25rem 0.5rem', cursor: 'pointer' }}>Delete</button>
             </li>
           ))}
         </ul>

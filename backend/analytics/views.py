@@ -1,4 +1,6 @@
 from django.db.models import Count
+from django.utils import timezone
+from datetime import timedelta, date
 from django.db.models.functions import TruncDate, TruncWeek, TruncMonth
 from django.contrib.auth import get_user_model
 from rest_framework import generics, permissions, status
@@ -84,7 +86,7 @@ class TrendChartView(APIView):
             .annotate(count=Count('id'))
             .order_by('period')
         )
-        view_map = {str(v['period']): v['count'] for v in view_qs}
+        view_map = {str(v['period'].date() if hasattr(v['period'], 'date') else v['period']): v['count'] for v in view_qs}
 
         shortlist_qs = (
             InterestEvent.objects.filter(project=project, event_type=InterestEvent.EventType.SHORTLIST)
@@ -93,9 +95,27 @@ class TrendChartView(APIView):
             .annotate(count=Count('id'))
             .order_by('period')
         )
-        shortlist_map = {str(s['period']): s['count'] for s in shortlist_qs}
+        shortlist_map = {str(s['period'].date() if hasattr(s['period'], 'date') else s['period']): s['count'] for s in shortlist_qs}
 
-        all_periods = sorted(set(view_map.keys()) | set(shortlist_map.keys()))
+        # Build full date range (last 30 days for daily, last 12 weeks for weekly, last 12 months for monthly)
+        if period == 'weekly':
+            num_periods = 12
+            delta = timedelta(weeks=1)
+        elif period == 'monthly':
+            num_periods = 12
+            delta = timedelta(days=30)
+        else:
+            num_periods = 30
+            delta = timedelta(days=1)
+
+        # Generate all periods in range
+        end_date = timezone.localdate() if period == 'daily' else timezone.now()
+        if period == 'daily':
+            all_dates = [end_date - timedelta(days=i) for i in range(num_periods - 1, -1, -1)]
+            all_periods = [str(d) for d in all_dates]
+        else:
+            all_periods = sorted(set(view_map.keys()) | set(shortlist_map.keys()))
+
         series = []
         for p in all_periods:
             series.append({
@@ -107,6 +127,7 @@ class TrendChartView(APIView):
         return Response({
             'project_id': project.id,
             'project_title': project.title,
+            'designer_name': project.designer.username,
             'period': period,
             'series': series,
         })
@@ -138,3 +159,72 @@ class ShortlistCountView(APIView):
             return Response({'error': 'Project not found'}, status=status.HTTP_404_NOT_FOUND)
         count = InterestEvent.objects.filter(project=project, event_type=InterestEvent.EventType.SHORTLIST).count()
         return Response({'project_id': project.id, 'shortlist_count': count})
+
+
+# --- Alias classes for naming guide consistency ---
+# Guide: InterestAnalyticsControl / AnalyticsController
+InterestAnalyticsControl = PortfolioInterestView
+AnalyticsController = PortfolioInterestView
+
+# Guide: InterestEventRepo
+class InterestEventRepo:
+    """Repository alias for InterestEvent data access — matches naming guide."""
+    @staticmethod
+    def findByPeriod(project_id, period):
+        from projects.models import InterestEvent
+        from django.db.models.functions import TruncDate, TruncWeek, TruncMonth
+        trunc_fn = TruncDate
+        if period == 'weekly':
+            trunc_fn = TruncWeek
+        elif period == 'monthly':
+            trunc_fn = TruncMonth
+        return InterestEvent.objects.filter(project_id=project_id).annotate(period=trunc_fn('occurred_at'))
+
+    @staticmethod
+    def countByType(project_id):
+        from projects.models import InterestEvent
+        views = InterestEvent.objects.filter(project_id=project_id, event_type=InterestEvent.EventType.VIEW).count()
+        shortlists = InterestEvent.objects.filter(project_id=project_id, event_type=InterestEvent.EventType.SHORTLIST).count()
+        return {'view_count': views, 'shortlist_count': shortlists}
+
+
+class GenerateEventView(APIView):
+    """Generates random view/shortlist events for demo purposes. Called periodically by the frontend."""
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        import django.utils.timezone as tz
+        now = tz.now()
+        published = InteriorDesignProject.objects.filter(status=InteriorDesignProject.Status.PUBLISHED)
+        if not published.exists():
+            return Response({'status': 'no published projects'}, status=status.HTTP_200_OK)
+
+        project = random.choice(list(published))
+        # Generate 1-3 view events
+        num_views = random.randint(1, 3)
+        for _ in range(num_views):
+            InterestEvent.objects.create(
+                project=project,
+                event_type=InterestEvent.EventType.VIEW,
+                occurred_at=now,
+            )
+        # 20% chance of a shortlist
+        if random.random() < 0.2:
+            customers = User.objects.filter(role=User.Role.CUSTOMER)
+            if customers.exists():
+                cust = random.choice(list(customers))
+                try:
+                    InterestEvent.objects.create(
+                        project=project,
+                        customer=cust,
+                        event_type=InterestEvent.EventType.SHORTLIST,
+                        occurred_at=now,
+                    )
+                except Exception:
+                    pass
+
+        return Response({
+            'status': 'ok',
+            'project': project.title,
+            'views_added': num_views,
+        })
