@@ -31,7 +31,7 @@ function Nav() {
           setSelectedDesigner(String(designerList[0].id))
           localStorage.setItem('designer_id', String(designerList[0].id))
         }
-      }).catch(() => {})
+      }).catch(err => console.error('Failed to load designers:', err))
     }
   }, [role])
 
