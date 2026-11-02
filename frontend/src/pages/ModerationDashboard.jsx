@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { apiGet, apiPatch } from '../api/client'
 
 // Review and flag inappropriate project content
-function ModerationPage() {
+function ModerationDashboard() {
   const [projects, setProjects] = useState([])
   const [loading, setLoading] = useState(true)
 
@@ -24,39 +24,74 @@ function ModerationPage() {
     }
   }
 
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'PUBLISHED': return '#4caf50'
+      case 'DRAFT': return '#ff9800'
+      case 'ARCHIVED': return '#f44336'
+      default: return '#ccc'
+    }
+  }
+
   return (
-    <div style={{ padding: "0 2rem" }}>
+    <div style={{ maxWidth: '900px', margin: '0 auto', padding: '0 2rem' }}>
       <h1>Moderate Flagged Project Content</h1>
       <p>Review and remove projects that customers have flagged.</p>
-      {loading ? <p>Loading...</p> : (
-        <table border="1" cellPadding="8" style={{ borderCollapse: 'collapse', borderColor: 'rgba(255,255,255,0.3)', width: '100%' }}>
-          <thead>
-            <tr>
-              <th>ID</th><th>Title</th><th>Style</th><th>Status</th><th>Designer</th><th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {projects.map(p => (
-              <tr key={p.id}>
-                <td>{p.id}</td>
-                <td>{p.title}</td>
-                <td>{p.style}</td>
-                <td>{p.status}</td>
-                <td>{p.designer_name}</td>
-                <td>
-                  {p.status !== 'ARCHIVED' && (
-                    <button onClick={() => handleFlag(p.id)} style={{ color: 'red' }}>Flag & Archive</button>
-                  )}
-                </td>
+      {loading ? <p>Loading...</p> : projects.length === 0 ? (
+        <p>No projects found.</p>
+      ) : (
+        <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '8px', overflow: 'hidden' }}>
+          <table cellPadding="12" style={{ borderCollapse: 'collapse', width: '100%' }}>
+            <thead>
+              <tr style={{ background: 'rgba(255,255,255,0.1)' }}>
+                <th style={{ textAlign: 'left' }}>ID</th>
+                <th style={{ textAlign: 'left' }}>Title</th>
+                <th style={{ textAlign: 'left' }}>Style</th>
+                <th style={{ textAlign: 'left' }}>Status</th>
+                <th style={{ textAlign: 'left' }}>Designer</th>
+                <th style={{ textAlign: 'center' }}>Action</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {projects.map(p => (
+                <tr key={p.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                  <td>{p.id}</td>
+                  <td>{p.title}</td>
+                  <td>{p.style}</td>
+                  <td>
+                    <span style={{
+                      padding: '0.25rem 0.5rem',
+                      borderRadius: '4px',
+                      background: getStatusColor(p.status),
+                      color: 'white',
+                      fontSize: '0.8rem',
+                    }}>
+                      {p.status}
+                    </span>
+                  </td>
+                  <td>{p.designer_name}</td>
+                  <td style={{ textAlign: 'center' }}>
+                    {p.status !== 'ARCHIVED' && (
+                      <button onClick={() => handleFlag(p.id)} style={{
+                        color: '#ff6b6b',
+                        background: 'rgba(255,107,107,0.1)',
+                        border: '1px solid #ff6b6b',
+                        borderRadius: '4px',
+                        padding: '0.25rem 0.75rem',
+                        cursor: 'pointer',
+                      }}>
+                        Flag & Archive
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   )
 }
 
-export default ModerationPage
-
-
+export default ModerationDashboard

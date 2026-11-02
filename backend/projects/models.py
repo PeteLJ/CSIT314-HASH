@@ -42,11 +42,24 @@ class InteriorDesignProject(models.Model):
         choices=Status.choices,
         default=Status.DRAFT,
     )
+    category = models.ForeignKey(
+        'categories.ProjectCategory',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='projects',
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ['-created_at']
+
+    def countByCategory(self):
+        """Count projects in this category — matches naming guide."""
+        if self.category:
+            return InteriorDesignProject.objects.filter(category=self.category).count()
+        return 0
 
     def __str__(self):
         return f'{self.title} ({self.get_status_display()})'

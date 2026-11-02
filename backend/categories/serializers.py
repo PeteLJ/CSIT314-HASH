@@ -1,9 +1,9 @@
-﻿from rest_framework import serializers
+from rest_framework import serializers
 from .models import ProjectCategory
 
 
 class ProjectCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = ProjectCategory
-        fields = ('id', 'name', 'description', 'created_at')
+        fields = ('id', 'name', 'category_type', 'description', 'created_at')
         read_only_fields = ('created_at',)
