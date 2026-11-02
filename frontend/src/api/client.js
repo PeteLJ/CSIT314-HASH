@@ -1,4 +1,4 @@
-﻿// API base URL - uses localhost in development, PythonAnywhere in production
+// API base URL - uses localhost in development, PythonAnywhere in production
 const API_BASE = window.location.hostname === 'localhost'
   ? 'http://127.0.0.1:8000/api'
   : 'https://petelj.pythonanywhere.com/api'

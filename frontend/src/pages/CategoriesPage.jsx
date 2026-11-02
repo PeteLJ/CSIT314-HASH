@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { apiGet, apiPost, apiDelete } from '../api/client'
 
 function CategoriesPage() {
@@ -49,16 +49,16 @@ function CategoriesPage() {
         <button type="submit" style={{ padding: '0.5rem 1rem', borderRadius: '8px', border: 'none', background: '#c4704b', color: 'white', cursor: 'pointer' }}>Add</button>
       </form>
       {loading ? <p>Loading...</p> : (
-        <ul style={{ listStyle: 'none', padding: 0 }}>
+        <div style={{ padding: 0 }}>
           {categories.map(c => (
             <li key={c.id} style={{ marginBottom: '0.5rem', padding: '0.75rem', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
-                <strong>{c.name}</strong> â€” {c.description}
+                <strong>{c.name}</strong> - {c.description}
               </div>
               <button onClick={() => handleDelete(c.id)} style={{ color: '#ff6b6b', background: 'none', border: '1px solid #ff6b6b', borderRadius: '4px', padding: '0.25rem 0.5rem', cursor: 'pointer' }}>Delete</button>
             </li>
           ))}
-        </ul>
+        </div>
       )}
     </div>
   )

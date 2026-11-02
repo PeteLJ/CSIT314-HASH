@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { apiGet, apiPatch } from '../api/client'
 
 function ModerationPage() {

@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { apiGet } from '../api/client'
 
-// Designer dashboard showing portfolio interest overview
 function DashboardPage() {
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -18,34 +17,45 @@ function DashboardPage() {
   if (!data) return <p>Failed to load portfolio data.</p>
 
   return (
-    <div>
+    <div style={{ padding: "0 2rem", maxWidth: '900px', margin: '0 auto' }}>
       <h1>Portfolio Interest Overview</h1>
-      <div style={{ display: 'flex', gap: '2rem', marginBottom: '1rem', justifyContent: 'center' }}>
-        <div><strong>Total Views:</strong> {data.total_views}</div>
-        <div><strong>Total Shortlists:</strong> {data.total_shortlists}</div>
-        <div><strong>Projects:</strong> {data.project_count}</div>
+      <div style={{ display: 'flex', gap: '2rem', marginBottom: '2rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+        <div style={{ background: 'rgba(255,255,255,0.08)', padding: '1.5rem', borderRadius: '12px', textAlign: 'center', minWidth: '150px' }}>
+          <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#64b5f6' }}>{data.total_views}</div>
+          <div style={{ color: '#ccc' }}>Total Views</div>
+        </div>
+        <div style={{ background: 'rgba(255,255,255,0.08)', padding: '1.5rem', borderRadius: '12px', textAlign: 'center', minWidth: '150px' }}>
+          <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#ff6b6b' }}>{data.total_shortlists}</div>
+          <div style={{ color: '#ccc' }}>Total Shortlists</div>
+        </div>
+        <div style={{ background: 'rgba(255,255,255,0.08)', padding: '1.5rem', borderRadius: '12px', textAlign: 'center', minWidth: '150px' }}>
+          <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#c4704b' }}>{data.project_count}</div>
+          <div style={{ color: '#ccc' }}>Projects</div>
+        </div>
       </div>
       <h2>Ranked Projects</h2>
       {data.projects.length === 0 ? <p>No projects found.</p> : (
-        <table border="1" cellPadding="8" style={{ borderCollapse: 'collapse', borderColor: 'rgba(255,255,255,0.3)', margin: '0 auto' }}>
-          <thead>
-            <tr>
-              <th>Rank</th><th>Title</th><th>Style</th><th>Status</th><th>Views</th><th>Shortlists</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.projects.map((p, i) => (
-              <tr key={p.id}>
-                <td>{i + 1}</td>
-                <td><Link to={`/trend/${p.id}`}>{p.title}</Link></td>
-                <td>{p.style}</td>
-                <td>{p.status}</td>
-                <td>{p.view_count}</td>
-                <td>{p.shortlist_count}</td>
+        <div style={{ overflowX: 'auto', borderRadius: '8px' }}>
+          <table cellPadding="12" style={{ borderCollapse: 'collapse', width: '100%', background: 'rgba(255,255,255,0.03)' }}>
+            <thead>
+              <tr style={{ background: 'rgba(255,255,255,0.1)' }}>
+                <th>Rank</th><th>Title</th><th>Style</th><th>Status</th><th>Views</th><th>Shortlists</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {data.projects.map((p, i) => (
+                <tr key={p.id}>
+                  <td>{i + 1}</td>
+                  <td><Link to={`/trend/${p.id}`}>{p.title}</Link></td>
+                  <td>{p.style}</td>
+                  <td>{p.status}</td>
+                  <td>{p.view_count}</td>
+                  <td>{p.shortlist_count}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   )
