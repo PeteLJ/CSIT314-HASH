@@ -45,7 +45,10 @@ class AnalyticsAPITest(TestCase):
     def test_trend_chart_empty(self):
         response = self.client.get(f'/api/analytics/trend/{self.project.id}/?period=daily')
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data['series'], [])
+        self.assertEqual(len(response.data['series']), 30)
+        for entry in response.data['series']:
+            self.assertEqual(entry['view_count'], 0)
+            self.assertEqual(entry['shortlist_count'], 0)
 
     def test_trend_chart_with_events(self):
         InterestEvent.objects.create(project=self.project, event_type=InterestEvent.EventType.VIEW)
