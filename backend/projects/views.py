@@ -188,23 +188,72 @@ class ProjectDetailView(generics.RetrieveUpdateDestroyAPIView):
         return InteriorDesignProject.objects.get(pk=project_id)
 
 
+
 class ProjectPublishView(APIView):
-    """Toggle publication status: DRAFT -> PUBLISHED -> ARCHIVED."""
     permission_classes = [permissions.IsAuthenticated]
 
     def patch(self, request, pk):
         try:
             project = InteriorDesignProject.objects.get(pk=pk)
         except InteriorDesignProject.DoesNotExist:
-            return Response({'error': 'Project not found'}, status=status.HTTP_404_NOT_FOUND)
-        if project.designer != request.user and not request.user.is_staff:
-            return Response({'error': 'Not your project'}, status=status.HTTP_403_FORBIDDEN)
+            return Response(
+                {'error': 'Project not found'},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        if (
+            project.designer_id != request.user.id
+            and not request.user.is_staff
+        ):
+            return Response(
+                {'error': 'Not your project'},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
         new_status = request.data.get('status')
-        if new_status not in [s.value for s in InteriorDesignProject.Status]:
-            return Response({'error': 'Invalid status'}, status=status.HTTP_400_BAD_REQUEST)
+
+        allowed_transitions = {
+            InteriorDesignProject.Status.DRAFT: {
+                InteriorDesignProject.Status.DRAFT,
+                InteriorDesignProject.Status.PUBLISHED,
+            },
+            InteriorDesignProject.Status.PUBLISHED: {
+                InteriorDesignProject.Status.UNPUBLISHED,
+            },
+            InteriorDesignProject.Status.UNPUBLISHED: {
+                InteriorDesignProject.Status.DRAFT,
+                InteriorDesignProject.Status.PUBLISHED,
+            },
+        }
+
+        current_status = project.status
+
+        if new_status not in allowed_transitions.get(
+            current_status, set()
+        ):
+            return Response(
+                {'error': 'Invalid status transition'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if new_status == InteriorDesignProject.Status.PUBLISHED:
+            errors = ProjectValidator.validate_for_publication(
+                project
+            )
+
+            if errors:
+                return Response(
+                    {'errors': errors},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
         project.status = new_status
-        project.save()
-        return Response({'id': project.id, 'status': project.status})
+        project.save(update_fields=['status', 'updated_at'])
+
+        return Response({
+            'id': project.id,
+            'status': project.status,
+        })
 
 
 class RecordViewView(APIView):
