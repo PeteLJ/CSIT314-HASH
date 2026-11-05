@@ -126,3 +126,10 @@ class AnalyticsAPITest(TestCase):
         self.client.force_authenticate(user=customer)
         response = self.client.post('/api/interest-events/', {'project': self.project.id, 'event_type': 'SHORTLIST'})
         self.assertEqual(response.status_code, 400)
+
+    def test_incomplete_project_cannot_be_published(self):
+        project = InteriorDesignProject.objects.create(designer=self.designer, title='Incomplete')
+        response = self.client.patch(f'/api/projects/{project.id}/publish/', {'status': 'PUBLISHED'})
+        self.assertEqual(response.status_code, 400)
+        project.refresh_from_db()
+        self.assertEqual(project.status, 'DRAFT')

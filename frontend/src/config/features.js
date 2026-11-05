@@ -3,6 +3,7 @@
 // Update these for each sprint to show incremental progress
 
 export const FEATURES = {
+  COMPANY_SETTINGS: true, // M2-02 and M2-05
   // Sprint 3: Customer journey (4 stories)
   BROWSE_PROJECTS: true,      // US-31: Browse Design Projects
   PROJECT_DETAIL: true,       // US-35: View Project Details
