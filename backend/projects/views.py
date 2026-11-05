@@ -17,15 +17,39 @@ from .serializers import (
 
 # --- ProjectValidator (per naming guide) ---
 class ProjectValidator:
-    """Validates project data before creation."""
     @staticmethod
     def validate_draft(data):
         errors = []
-        if not data.get('title'):
+        if not str(data.get('title', '')).strip():
             errors.append('Title is required.')
-        if data.get('renovation_budget') and data.get('renovation_budget') < 0:
-            errors.append('Budget cannot be negative.')
         return errors
+
+    @staticmethod
+    def validate_for_publication(project):
+        errors = []
+        if not project.title.strip():
+            errors.append('Project title is required.')
+        if not project.description.strip():
+            errors.append('Project description is required.')
+        if not project.style.strip():
+            errors.append('Design style is required.')
+        if not project.room_type:
+            errors.append('Room type is required.')
+        if project.budget_min is None:
+            errors.append('Minimum budget is required.')
+        if project.budget_max is None:
+            errors.append('Maximum budget is required.')
+        if (
+            project.budget_min is not None
+            and project.budget_max is not None
+            and project.budget_max < project.budget_min
+        ):
+            errors.append('Invalid budget range.')
+        if project.category_id is None:
+            errors.append('Project category is required.')
+
+        return errors
+
 
 
 # --- US-31: Browse Design Projects ---
