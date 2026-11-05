@@ -86,14 +86,33 @@ class ProjectController(generics.ListCreateAPIView):
 
         return queryset
 
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            return [permissions.IsAuthenticated()]
+        return [permissions.AllowAny()]
+
     def perform_create(self, serializer):
-        # Validate project data before creation (per naming guide: ProjectValidator.validateDraft)
-        data = self.request.data
-        errors = ProjectValidator.validate_draft(data)
+        from rest_framework.exceptions import (
+            PermissionDenied,
+            ValidationError,
+        )
+
+        if self.request.user.role != 'INTERIOR_DESIGNER':
+            raise PermissionDenied(
+                'Only interior designers can create projects.'
+            )
+
+        errors = ProjectValidator.validate_draft(
+            serializer.validated_data
+        )
+
         if errors:
-            from rest_framework.exceptions import ValidationError
             raise ValidationError({'errors': errors})
-        serializer.save(designer=self.request.user)
+
+        serializer.save(
+            designer=self.request.user,
+            status=InteriorDesignProject.Status.DRAFT,
+        )
 
     def getProjectsForBrowse(self):
         """Alias for get_queryset — matches naming guide."""
