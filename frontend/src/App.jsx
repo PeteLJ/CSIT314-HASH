@@ -10,6 +10,7 @@ import TrendPage from './pages/TrendPage'
 import CreateProjectUI from './pages/CreateProjectUI'
 import CategoryManagementUI from './pages/CategoryManagementUI'
 import ModerationDashboard from './pages/ModerationDashboard'
+import PublicationManagementUI from './pages/PublicationManagementUI'
 import './App.css'
 
 const ROLES = ['Customer', 'Interior Designer', 'Platform Manager']
@@ -56,6 +57,7 @@ function Nav() {
     { to: '/browse', label: 'Browse Projects', feature: 'BROWSE_PROJECTS', roles: ['Customer', 'Interior Designer', 'Platform Manager'] },
     { to: '/dashboard', label: 'Designer Dashboard', feature: 'PORTFOLIO_DASHBOARD', roles: ['Interior Designer'] },
     { to: '/create', label: 'Create Project', feature: 'CREATE_PROJECT', roles: ['Interior Designer'] },
+    { to: '/publication', label: 'Manage Publication', feature: 'PUBLICATION_STATUS', roles: ['Interior Designer'] },
     { to: '/categories', label: 'Categories', feature: 'CATEGORIES', roles: ['Platform Manager'] },
     { to: '/moderation', label: 'Moderation', feature: 'MODERATION', roles: ['Platform Manager'] },
   ]
@@ -196,6 +198,7 @@ function App() {
           {FEATURES.CREATE_PROJECT && <Route path="/create" element={<CreateProjectUI />} />}
           {FEATURES.CATEGORIES && <Route path="/categories" element={<CategoryManagementUI />} />}
           {FEATURES.MODERATION && <Route path="/moderation" element={<ModerationDashboard />} />}
+          {FEATURES.PUBLICATION_STATUS && <Route path="/publication" element={<PublicationManagementUI />} />}
         </Routes>
       </div>
     </HashRouter>
