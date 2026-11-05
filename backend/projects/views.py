@@ -188,6 +188,15 @@ class ProjectDetailView(generics.RetrieveUpdateDestroyAPIView):
         return InteriorDesignProject.objects.get(pk=project_id)
 
 
+class MyProjectsView(generics.ListAPIView):
+    serializer_class = InteriorDesignProjectSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return InteriorDesignProject.objects.filter(
+            designer=self.request.user
+        )
+
 
 class ProjectPublishView(APIView):
     permission_classes = [permissions.IsAuthenticated]
