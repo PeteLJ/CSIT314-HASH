@@ -11,6 +11,7 @@ class InteriorDesignProject(models.Model):
     class Status(models.TextChoices):
         DRAFT = 'DRAFT', 'Draft'
         PUBLISHED = 'PUBLISHED', 'Published'
+        UNPUBLISHED = 'UNPUBLISHED', 'Unpublished'
         ARCHIVED = 'ARCHIVED', 'Archived'
 
     # Room type choices
