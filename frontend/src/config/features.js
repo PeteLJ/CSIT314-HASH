@@ -16,8 +16,8 @@ export const FEATURES = {
   MODERATION: true,          // US-56: Moderate Flagged Project Content
 
   // Sprint 5: Designer and Company management (4 stories - not yet implemented)
-  CREATE_PROJECT: false,      // US-21: Create Interior Design Project
-  PUBLICATION_STATUS: false,  // US-24: Manage Project Publication Status
+  CREATE_PROJECT: true,      // US-21: Create Interior Design Project
+  PUBLICATION_STATUS: true,  // US-24: Manage Project Publication Status
   EARLIEST_START_DATE: false, // US-16: Update Earliest Renovation Start Date
   RENOVATION_PACKAGES: false, // US-17: Manage Renovation Packages
 }
