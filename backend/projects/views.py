@@ -13,6 +13,7 @@ from .serializers import (
     ProjectData,
     InterestSummary,
 )
+from rest_framework.permissions import BasePermission, SAFE_METHODS
 
 
 # --- ProjectValidator (per naming guide) ---
