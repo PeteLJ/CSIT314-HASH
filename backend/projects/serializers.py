@@ -8,9 +8,41 @@ class InteriorDesignProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = InteriorDesignProject
         fields = ('id', 'title', 'description', 'style', 'room_type',
-                  'budget_min', 'budget_max', 'status', 'designer',
-                  'designer_name', 'created_at', 'updated_at')
-        read_only_fields = ('designer', 'created_at', 'updated_at')
+                  'budget_min', 'budget_max', 'status', 'category',
+                  'designer', 'designer_name', 'created_at', 'updated_at')
+        read_only_fields = ('designer', 'status', 'created_at', 'updated_at')
+    def validate(self, attrs):
+        budget_min = attrs.get(
+            'budget_min',
+            getattr(self.instance, 'budget_min', None)
+        )
+        budget_max = attrs.get(
+            'budget_max',
+            getattr(self.instance, 'budget_max', None)
+        )
+
+        errors = {}
+
+        if budget_min is not None and budget_min < 0:
+            errors['budget_min'] = 'Budget cannot be negative.'
+
+        if budget_max is not None and budget_max < 0:
+            errors['budget_max'] = 'Budget cannot be negative.'
+
+        if (
+            budget_min is not None
+            and budget_max is not None
+            and budget_max < budget_min
+        ):
+            errors['budget_max'] = (
+                'Maximum budget must be greater than '
+                'or equal to minimum budget.'
+            )
+
+        if errors:
+            raise serializers.ValidationError(errors)
+
+        return attrs
 
 
 # --- DTOs (Data Transfer Objects) per naming guide ---
