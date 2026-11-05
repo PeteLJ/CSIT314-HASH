@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { apiPost } from '../api/client'
+import { apiGet, apiPost } from '../api/client'
 
 // Form to create a new design project
 function CreatePage() {
@@ -9,13 +9,29 @@ function CreatePage() {
     title: '',
     description: '',
     style: '',
+    room_type: '',
     budget_min: '',
     budget_max: '',
-    status: 'DRAFT',
+    category: '',
   })
+  const [categories, setCategories] = useState([])
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
-
+  
+  useEffect(() => {
+    apiGet('/categories/')
+      .then(data => {
+        const list = Array.isArray(data)
+          ? data
+          : data.results || []
+  
+        setCategories(list)
+      })
+      .catch(err => {
+        console.error('Failed to load categories:', err)
+      })
+  }, [])
+  
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value })
   }
@@ -55,6 +71,26 @@ function CreatePage() {
             {styles.map(s => <option key={s} value={s}>{s}</option>)}
           </select>
         </div>
+        
+        <div style={{ marginBottom: '1rem' }}>
+          <label>Project Category: </label>
+        
+          <select
+            name="category"
+            value={form.category}
+            onChange={handleChange}
+            style={{ width: '100%' }}
+          >
+            <option value="">Select category</option>
+        
+            {categories.map(category => (
+              <option key={category.id} value={category.id}>
+                {category.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
         <div style={{ marginBottom: '1rem' }}>
           <label>Budget Min: </label>
           <input name="budget_min" type="number" value={form.budget_min} onChange={handleChange} style={{ width: '100%' }} />
@@ -63,13 +99,24 @@ function CreatePage() {
           <label>Budget Max: </label>
           <input name="budget_max" type="number" value={form.budget_max} onChange={handleChange} style={{ width: '100%' }} />
         </div>
+        
         <div style={{ marginBottom: '1rem' }}>
-          <label>Status: </label>
-          <select name="status" value={form.status} onChange={handleChange} style={{ width: '100%' }}>
-            <option value="DRAFT">Draft</option>
-            <option value="PUBLISHED">Published</option>
+          <label>Room Type: </label>
+          <select
+            name="room_type"
+            value={form.room_type}
+            onChange={handleChange}
+            style={{ width: '100%' }}
+          >
+            <option value="">Select room type</option>
+            <option value="LIVING_ROOM">Living Room</option>
+            <option value="BEDROOM">Bedroom</option>
+            <option value="KITCHEN">Kitchen</option>
+            <option value="BATHROOM">Bathroom</option>
+            <option value="WHOLE_UNIT">Whole Unit</option>
           </select>
         </div>
+
         {error && <p style={{ color: 'red' }}>{error}</p>}
         <button type="submit" disabled={submitting}>
           {submitting ? 'Creating...' : 'Create Project'}
