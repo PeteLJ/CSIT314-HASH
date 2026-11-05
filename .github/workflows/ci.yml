@@ -26,4 +26,3 @@ jobs:
         run: python manage.py migrate
       - name: Run tests
         run: python -m pytest
-" 
