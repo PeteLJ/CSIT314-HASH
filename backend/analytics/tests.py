@@ -68,11 +68,30 @@ class AnalyticsAPITest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data['shortlist_count'], 1)
 
+
     def test_publish_status_toggle(self):
-        project = InteriorDesignProject.objects.create(designer=self.designer, title='Draft Project', status=InteriorDesignProject.Status.DRAFT)
-        response = self.client.patch(f'/api/projects/{project.id}/publish/', {'status': 'PUBLISHED'})
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data['status'], 'PUBLISHED')
+        # Create a complete project
+        project = InteriorDesignProject.objects.create(
+            designer=self.designer,
+            title='Draft Project',
+            description='Modern interior renovation project',
+            style='Modern',
+            room_type='LIVING_ROOM',
+            budget_min=10000,
+            budget_max=30000,
+            status=InteriorDesignProject.Status.DRAFT
+        )
+
+    # Assign an existing valid category if required
+    # by validate_for_publication()
+
+    response = self.client.patch(
+        f'/api/projects/{project.id}/publish/',
+        {'status': 'PUBLISHED'}
+    )
+
+    self.assertEqual(response.status_code, 200)
+    self.assertEqual(response.data['status'], 'PUBLISHED')
 
     def test_record_view(self):
         response = self.client.post(f'/api/projects/{self.project.id}/record-view/')
