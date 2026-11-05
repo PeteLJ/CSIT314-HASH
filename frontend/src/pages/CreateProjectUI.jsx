@@ -16,6 +16,7 @@ function CreatePage() {
   })
   const [categories, setCategories] = useState([])
   const [submitting, setSubmitting] = useState(false)
+  const [success, setSuccess] = useState('')
   const [error, setError] = useState('')
   
   useEffect(() => {
@@ -35,20 +36,39 @@ function CreatePage() {
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value })
   }
-
+  
   const handleSubmit = async (e) => {
     e.preventDefault()
+  
     setSubmitting(true)
     setError('')
+    setSuccess('')
+  
     try {
-      await apiPost('/projects/', form)
-      navigate('/')
+      const payload = {
+        ...form,
+        category: form.category || null,
+        budget_min: form.budget_min === ''
+          ? null
+          : form.budget_min,
+        budget_max: form.budget_max === ''
+          ? null
+          : form.budget_max,
+      }
+  
+      const project = await apiPost('/projects/', payload)
+  
+      setSuccess(
+        `Project "${project.title}" created successfully as Draft.`
+      )
+  
     } catch (err) {
-      setError('Failed to create project. Make sure you are logged in.')
+      setError(err.message)
     } finally {
       setSubmitting(false)
     }
   }
+
 
   const styles = ['Modern', 'Scandinavian', 'Industrial', 'Minimalist', 'Classic', 'Contemporary']
 
@@ -121,6 +141,7 @@ function CreatePage() {
         <button type="submit" disabled={submitting}>
           {submitting ? 'Creating...' : 'Create Project'}
         </button>
+        {success && <p style={{ color: 'green' }}>{success}</p>}
       </form>
     </div>
   )
