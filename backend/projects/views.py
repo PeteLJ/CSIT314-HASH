@@ -151,10 +151,37 @@ class ProjectController(generics.ListCreateAPIView):
 # --- US-35: View Project Details ---
 # Guide: ProjectController.getProjectDetails(), ProjectServiceImpl.fetchProjectsById()
 
+
+class IsProjectOwnerOrReadOnly(BasePermission):
+
+    def has_object_permission(self, request, view, obj):
+        is_owner = (
+            request.user.is_authenticated
+            and obj.designer_id == request.user.id
+        )
+
+        is_staff = (
+            request.user.is_authenticated
+            and request.user.is_staff
+        )
+
+        if request.method in SAFE_METHODS:
+            return (
+                obj.status == InteriorDesignProject.Status.PUBLISHED
+                or is_owner
+                or is_staff
+            )
+
+        return is_owner or is_staff
+
+
 class ProjectDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = InteriorDesignProject.objects.all()
     serializer_class = InteriorDesignProjectSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [
+        permissions.IsAuthenticatedOrReadOnly,
+        IsProjectOwnerOrReadOnly,
+    ]
 
     def getProjectDetails(self, project_id):
         """Alias for retrieve — matches naming guide."""
