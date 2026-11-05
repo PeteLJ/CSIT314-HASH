@@ -69,15 +69,48 @@ class AnalyticsAPITest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data['shortlist_count'], 1)
 
+
+    
     def test_publish_status_toggle(self):
-        category = ProjectCategory.objects.create(name='Residential')
+        category = ProjectCategory.objects.create(
+            name='Residential'
+        )
+
         project = InteriorDesignProject.objects.create(
-            designer=self.designer, title='Draft Project', description='Complete project',
-            style='Modern', room_type='BEDROOM', budget_min=100, budget_max=200,
-            category=category, status=InteriorDesignProject.Status.DRAFT)
-        response = self.client.patch(f'/api/projects/{project.id}/publish/', {'status': 'PUBLISHED'})
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data['status'], 'PUBLISHED')
+            designer=self.designer,
+            title='Draft Project',
+            description='Modern interior renovation project',
+            style='Modern',
+            room_type=InteriorDesignProject.RoomType.LIVING_ROOM,
+            budget_min=10000,
+            budget_max=30000,
+            category=category,
+            status=InteriorDesignProject.Status.DRAFT
+        )
+
+        response = self.client.patch(
+            f'/api/projects/{project.id}/publish/',
+            {'status': 'PUBLISHED'},
+            format='json'
+        )
+
+        self.assertEqual(
+            response.status_code,
+            200,
+            response.data
+        )
+
+        self.assertEqual(
+            response.data['status'],
+            InteriorDesignProject.Status.PUBLISHED
+        )
+
+        project.refresh_from_db()
+
+        self.assertEqual(
+            project.status,
+            InteriorDesignProject.Status.PUBLISHED
+        )
 
     def test_record_view(self):
         response = self.client.post(f'/api/projects/{self.project.id}/record-view/')
