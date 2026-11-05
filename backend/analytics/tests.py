@@ -2,6 +2,7 @@ from django.test import TestCase
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 from projects.models import InteriorDesignProject, InterestEvent
+from categories.models import ProjectCategory
 
 User = get_user_model()
 
@@ -69,29 +70,47 @@ class AnalyticsAPITest(TestCase):
         self.assertEqual(response.data['shortlist_count'], 1)
 
 
+    
     def test_publish_status_toggle(self):
-        # Create a complete project
+        category = ProjectCategory.objects.create(
+            name='Residential'
+        )
+
         project = InteriorDesignProject.objects.create(
             designer=self.designer,
             title='Draft Project',
             description='Modern interior renovation project',
             style='Modern',
-            room_type='LIVING_ROOM',
+            room_type=InteriorDesignProject.RoomType.LIVING_ROOM,
             budget_min=10000,
             budget_max=30000,
+            category=category,
             status=InteriorDesignProject.Status.DRAFT
         )
-    
-        # Assign an existing valid category if required
-        # by validate_for_publication()
-    
+
         response = self.client.patch(
             f'/api/projects/{project.id}/publish/',
-            {'status': 'PUBLISHED'}
+            {'status': 'PUBLISHED'},
+            format='json'
         )
-    
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data['status'], 'PUBLISHED')
+
+        self.assertEqual(
+            response.status_code,
+            200,
+            response.data
+        )
+
+        self.assertEqual(
+            response.data['status'],
+            InteriorDesignProject.Status.PUBLISHED
+        )
+
+        project.refresh_from_db()
+
+        self.assertEqual(
+            project.status,
+            InteriorDesignProject.Status.PUBLISHED
+        )
 
     def test_record_view(self):
         response = self.client.post(f'/api/projects/{self.project.id}/record-view/')
