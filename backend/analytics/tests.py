@@ -80,7 +80,7 @@ class AnalyticsAPITest(TestCase):
             budget_min=10000,
             budget_max=30000,
             status=InteriorDesignProject.Status.DRAFT
-        )
+    )
 
     # Assign an existing valid category if required
     # by validate_for_publication()
