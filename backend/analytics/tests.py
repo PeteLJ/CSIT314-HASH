@@ -80,18 +80,18 @@ class AnalyticsAPITest(TestCase):
             budget_min=10000,
             budget_max=30000,
             status=InteriorDesignProject.Status.DRAFT
-    )
-
-    # Assign an existing valid category if required
-    # by validate_for_publication()
-
-    response = self.client.patch(
-        f'/api/projects/{project.id}/publish/',
-        {'status': 'PUBLISHED'}
-    )
-
-    self.assertEqual(response.status_code, 200)
-    self.assertEqual(response.data['status'], 'PUBLISHED')
+        )
+    
+        # Assign an existing valid category if required
+        # by validate_for_publication()
+    
+        response = self.client.patch(
+            f'/api/projects/{project.id}/publish/',
+            {'status': 'PUBLISHED'}
+        )
+    
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['status'], 'PUBLISHED')
 
     def test_record_view(self):
         response = self.client.post(f'/api/projects/{self.project.id}/record-view/')
