@@ -11,6 +11,7 @@ import CreateProjectUI from './pages/CreateProjectUI'
 import CategoryManagementUI from './pages/CategoryManagementUI'
 import ModerationDashboard from './pages/ModerationDashboard'
 import PublicationManagementUI from './pages/PublicationManagementUI'
+import CompanySettingsPage from './pages/CompanySettingsPage'
 import './App.css'
 
 const ROLES = ['Customer', 'Interior Designer', 'Platform Manager']
@@ -53,6 +54,7 @@ function Nav() {
   }
 
   const allLinks = [
+    { to: '/company-settings', label: 'Company Settings', feature: 'COMPANY_SETTINGS', roles: ['Interior Designer'] },
     { to: '/', label: 'Home', feature: null, roles: ['Customer', 'Interior Designer', 'Platform Manager'] },
     { to: '/browse', label: 'Browse Projects', feature: 'BROWSE_PROJECTS', roles: ['Customer', 'Interior Designer', 'Platform Manager'] },
     { to: '/dashboard', label: 'Designer Dashboard', feature: 'PORTFOLIO_DASHBOARD', roles: ['Interior Designer'] },
@@ -190,6 +192,7 @@ function App() {
       <Nav />
       <div style={{ paddingTop: '70px', width: '100%', minHeight: '100vh', boxSizing: 'border-box' }}>
         <Routes>
+          {FEATURES.COMPANY_SETTINGS && <Route path="/company-settings" element={<CompanySettingsPage />} />}
           <Route path="/" element={<HomePage />} />
           {FEATURES.BROWSE_PROJECTS && <Route path="/browse" element={<BrowsePage />} />}
           {FEATURES.PROJECT_DETAIL && <Route path="/project/:id" element={<ProjectDetailPage />} />}

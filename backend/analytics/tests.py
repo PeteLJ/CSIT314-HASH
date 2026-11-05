@@ -2,6 +2,7 @@ from django.test import TestCase
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 from projects.models import InteriorDesignProject, InterestEvent
+from categories.models import ProjectCategory
 
 User = get_user_model()
 
@@ -69,7 +70,11 @@ class AnalyticsAPITest(TestCase):
         self.assertEqual(response.data['shortlist_count'], 1)
 
     def test_publish_status_toggle(self):
-        project = InteriorDesignProject.objects.create(designer=self.designer, title='Draft Project', status=InteriorDesignProject.Status.DRAFT)
+        category = ProjectCategory.objects.create(name='Residential')
+        project = InteriorDesignProject.objects.create(
+            designer=self.designer, title='Draft Project', description='Complete project',
+            style='Modern', room_type='BEDROOM', budget_min=100, budget_max=200,
+            category=category, status=InteriorDesignProject.Status.DRAFT)
         response = self.client.patch(f'/api/projects/{project.id}/publish/', {'status': 'PUBLISHED'})
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data['status'], 'PUBLISHED')
@@ -88,3 +93,10 @@ class AnalyticsAPITest(TestCase):
         self.client.force_authenticate(user=customer)
         response = self.client.post('/api/interest-events/', {'project': self.project.id, 'event_type': 'SHORTLIST'})
         self.assertEqual(response.status_code, 400)
+
+    def test_incomplete_project_cannot_be_published(self):
+        project = InteriorDesignProject.objects.create(designer=self.designer, title='Incomplete')
+        response = self.client.patch(f'/api/projects/{project.id}/publish/', {'status': 'PUBLISHED'})
+        self.assertEqual(response.status_code, 400)
+        project.refresh_from_db()
+        self.assertEqual(project.status, 'DRAFT')
