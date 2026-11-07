@@ -8,15 +8,48 @@ class InteriorDesignProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = InteriorDesignProject
         fields = ('id', 'title', 'description', 'style', 'room_type',
-                  'budget_min', 'budget_max', 'status', 'designer',
-                  'designer_name', 'created_at', 'updated_at')
-        read_only_fields = ('designer', 'created_at', 'updated_at')
+                  'budget_min', 'budget_max', 'status', 'category',
+                  'designer', 'designer_name', 'created_at', 'updated_at')
+        read_only_fields = ('designer', 'status', 'created_at', 'updated_at')
+
+    def validate(self, attrs):
+        budget_min = attrs.get(
+            'budget_min',
+            getattr(self.instance, 'budget_min', None)
+        )
+        budget_max = attrs.get(
+            'budget_max',
+            getattr(self.instance, 'budget_max', None)
+        )
+
+        errors = {}
+
+        if budget_min is not None and budget_min < 0:
+            errors['budget_min'] = 'Budget cannot be negative.'
+
+        if budget_max is not None and budget_max < 0:
+            errors['budget_max'] = 'Budget cannot be negative.'
+
+        if (
+            budget_min is not None
+            and budget_max is not None
+            and budget_max < budget_min
+        ):
+            errors['budget_max'] = (
+                'Maximum budget must be greater than '
+                'or equal to minimum budget.'
+            )
+
+        if errors:
+            raise serializers.ValidationError(errors)
+
+        return attrs
 
 
-# --- DTOs (Data Transfer Objects) per naming guide ---
+# --- DTOs (Data Transfer Objects) ---
 
 class SearchCriteriaDTO(serializers.Serializer):
-    """Data shape for search/filter — not a model, just query params."""
+    """Search and filter parameters."""
     search_query = serializers.CharField(required=False, allow_blank=True)
     style = serializers.CharField(required=False, allow_blank=True)
     room_type = serializers.CharField(required=False, allow_blank=True)
@@ -24,12 +57,12 @@ class SearchCriteriaDTO(serializers.Serializer):
     budget_max = serializers.DecimalField(max_digits=10, decimal_places=2, required=False)
 
     def get_filters(self):
-        """Returns a dict of non-empty filters."""
+        """Return non-empty filters."""
         return {k: v for k, v in self.validated_data.items() if v is not None and v != ''}
 
 
 class ProjectSummaryDTO(serializers.Serializer):
-    """Data shape for browse project list items."""
+    """Project summary for browse list."""
     project_id = serializers.IntegerField(source='id')
     title = serializers.CharField()
     style = serializers.CharField()
@@ -41,7 +74,7 @@ class ProjectSummaryDTO(serializers.Serializer):
 
 
 class ProjectDetailDTO(serializers.Serializer):
-    """Data shape for project detail view."""
+    """Project detail view data."""
     project_id = serializers.IntegerField(source='id')
     title = serializers.CharField()
     description = serializers.CharField()
@@ -55,7 +88,7 @@ class ProjectDetailDTO(serializers.Serializer):
 
 
 class ProjectData(serializers.Serializer):
-    """Data shape for project creation — passed from UI to controller."""
+    """Project creation data."""
     title = serializers.CharField()
     description = serializers.CharField(required=False, allow_blank=True)
     renovation_budget = serializers.DecimalField(max_digits=10, decimal_places=2, required=False)
@@ -64,7 +97,7 @@ class ProjectData(serializers.Serializer):
 
 
 class InterestSummary(serializers.Serializer):
-    """Data shape for interest analytics — not a model, just a response shape."""
+    """Interest analytics data."""
     project_id = serializers.IntegerField()
     period = serializers.CharField()
     view_count = serializers.IntegerField()

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { apiGet, apiPost } from '../api/client'
+import { FEATURES } from '../config/features'
 
 function DetailPage() {
   const { id } = useParams()
@@ -8,6 +9,8 @@ function DetailPage() {
   const [loading, setLoading] = useState(true)
   const [viewCount, setViewCount] = useState(0)
   const [shortlistCount, setShortlistCount] = useState(0)
+  const [designerProfile, setDesignerProfile] = useState(null)
+  const [showProfile, setShowProfile] = useState(false)
   const viewRecorded = useRef(false)
 
   useEffect(() => {
@@ -22,6 +25,18 @@ function DetailPage() {
     apiGet(`/projects/${id}/view-count/`).then(data => setViewCount(data.view_count)).catch(() => {})
     apiGet(`/projects/${id}/shortlist-count/`).then(data => setShortlistCount(data.shortlist_count)).catch(() => {})
   }, [id])
+
+  const handleViewDesignerProfile = () => {
+    if (!project || !project.designer) return
+    if (showProfile) {
+      setShowProfile(false)
+      return
+    }
+    apiGet(`/users/${project.designer}/`).then(data => {
+      setDesignerProfile(data)
+      setShowProfile(true)
+    }).catch(() => {})
+  }
 
   if (loading) return <p>Loading...</p>
   if (!project) return <p>Project not found.</p>
@@ -39,7 +54,6 @@ function DetailPage() {
         marginTop: '1rem',
         flexWrap: 'wrap',
       }}>
-        {/* Image placeholder */}
         <div style={{
           flex: '1 1 300px',
           aspectRatio: '16 / 9',
@@ -53,12 +67,32 @@ function DetailPage() {
         }}>
           Image placeholder
         </div>
-        {/* Details */}
         <div style={{ flex: '1 1 300px' }}>
           <h1 style={{ marginTop: 0 }}>{project.title}</h1>
           <p><strong>Style:</strong> {project.style}</p>
           <p><strong>Cost:</strong> ${Number(project.budget_min).toLocaleString()}</p>
-          <p><strong>Designer:</strong> {project.designer_name}</p>
+          <p><strong>Designer:</strong> {project.designer_name}
+            {FEATURES.DETAIL_DESIGNER_PROFILE && (
+              <button onClick={handleViewDesignerProfile} style={{
+                marginLeft: '0.75rem',
+                padding: '0.25rem 0.75rem',
+                borderRadius: '4px',
+                border: '1px solid #64b5f6',
+                background: 'none',
+                color: '#64b5f6',
+                cursor: 'pointer',
+                fontSize: '0.85rem',
+              }}>
+                {showProfile ? 'Hide Profile' : 'View Designer Profile'}
+              </button>
+            )}
+          </p>
+          {showProfile && designerProfile && (
+            <div style={{ marginTop: '0.5rem', padding: '0.75rem', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', fontSize: '0.9rem' }}>
+          <p style={{ margin: '0.25rem 0' }}><strong>Username:</strong> {designerProfile.username}</p>
+          <p style={{ margin: '0.25rem 0' }}><strong>Company:</strong> {designerProfile.company || 'N/A'}</p>
+            </div>
+          )}
           <p><strong>Room Type:</strong> {roomTypeLabel}</p>
           <p style={{ marginTop: '1rem' }}>{project.description}</p>
           <div style={{ marginTop: '1rem', padding: '0.75rem', background: 'rgba(255,255,255,0.05)', borderRadius: '8px' }}>

@@ -1,9 +1,15 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { apiPost } from '../api/client'
+import { apiGet, apiPost } from '../api/client'
 
 function CreatePage() {
   const navigate = useNavigate()
+  const [roomTypes, setRoomTypes] = useState([])
+  useEffect(() => {
+    apiGet('/room-types/').then(data => {
+      setRoomTypes(Array.isArray(data) ? data : [])
+    }).catch(() => {})
+  }, [])
   const [form, setForm] = useState({
     title: '',
     description: '',
@@ -33,7 +39,13 @@ function CreatePage() {
     }
   }
 
-  const styles = ['Modern', 'Scandinavian', 'Industrial', 'Minimalist', 'Classic', 'Contemporary']
+  const [styles, setStyles] = useState([])
+  useEffect(() => {
+    apiGet('/categories/').then(data => {
+      const list = Array.isArray(data) ? data : data.results || []
+      setStyles(list.map(c => c.name))
+    }).catch(() => {})
+  }, [])
   const inputStyle = { width: '100%', padding: '0.5rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.3)', background: 'rgba(255,255,255,0.05)', color: '#e0e0e0', boxSizing: 'border-box' }
 
   return (
@@ -59,11 +71,9 @@ function CreatePage() {
           <label>Room Type: </label>
           <select name="room_type" value={form.room_type || ''} onChange={handleChange} style={inputStyle}>
             <option value="">Select room type</option>
-            <option value="LIVING_ROOM">Living Room</option>
-            <option value="BEDROOM">Bedroom</option>
-            <option value="KITCHEN">Kitchen</option>
-            <option value="BATHROOM">Bathroom</option>
-            <option value="WHOLE_UNIT">Whole Unit</option>
+            {roomTypes.map(rt => (
+              <option key={rt.value} value={rt.value}>{rt.label}</option>
+            ))}
           </select>
         </div>
         <div style={{ marginBottom: '1rem' }}>

@@ -10,6 +10,8 @@ import TrendPage from './pages/TrendPage'
 import CreateProjectUI from './pages/CreateProjectUI'
 import CategoryManagementUI from './pages/CategoryManagementUI'
 import ModerationDashboard from './pages/ModerationDashboard'
+import PublicationManagementUI from './pages/PublicationManagementUI'
+import CompanySettingsPage from './pages/CompanySettingsPage'
 import './App.css'
 
 const ROLES = ['Customer', 'Interior Designer', 'Platform Manager']
@@ -56,6 +58,8 @@ function Nav() {
     { to: '/browse', label: 'Browse Projects', feature: 'BROWSE_PROJECTS', roles: ['Customer', 'Interior Designer', 'Platform Manager'] },
     { to: '/dashboard', label: 'Designer Dashboard', feature: 'PORTFOLIO_DASHBOARD', roles: ['Interior Designer'] },
     { to: '/create', label: 'Create Project', feature: 'CREATE_PROJECT', roles: ['Interior Designer'] },
+    { to: '/publication', label: 'Manage Publication', feature: 'PUBLICATION_STATUS', roles: ['Interior Designer'] },
+    { to: '/company-settings', label: 'Company Settings', feature: 'COMPANY_SETTINGS', roles: ['Interior Designer'] },
     { to: '/categories', label: 'Categories', feature: 'CATEGORIES', roles: ['Platform Manager'] },
     { to: '/moderation', label: 'Moderation', feature: 'MODERATION', roles: ['Platform Manager'] },
   ]
@@ -73,18 +77,18 @@ function Nav() {
       zIndex: 1000,
       background: 'rgba(234, 230, 223, 0.8)',
       backdropFilter: 'blur(10px)',
-      padding: '0.25rem 1rem',
+      padding: '0.15rem 0.75rem',
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
       flexWrap: 'wrap',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginLeft: '0.5rem' }}>
-        <img src={`${import.meta.env.BASE_URL}logo.png`} alt="HASH Designs" style={{ width: '64px', height: '64px', objectFit: 'contain' }} />
+        <img src={`${import.meta.env.BASE_URL}logo.png`} alt="HASH Designs" style={{ width: '48px', height: '48px', objectFit: 'contain' }} />
       </div>
 
-      <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
-        <div className="desktop-nav" style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+      <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+        <div className="desktop-nav" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
           {navLinks.map(link => (
             <Link
               key={link.to}
@@ -92,8 +96,10 @@ function Nav() {
               style={{
                 color: '#333',
                 textDecoration: 'none',
-                padding: '0.25rem 0.5rem',
+                padding: '0.2rem 0.3rem',
                 borderRadius: '4px',
+                fontSize: '0.9rem',
+                whiteSpace: 'nowrap',
                 background: hoveredLink === link.to ? 'rgba(0,0,0,0.1)' : 'transparent',
                 transition: 'background 0.2s',
               }}
@@ -109,12 +115,14 @@ function Nav() {
           value={role}
           onChange={handleRoleChange}
           style={{
-            padding: '0.25rem 0.5rem',
+            padding: '0.2rem 0.3rem',
             borderRadius: '4px',
             border: '1px solid #ccc',
             background: 'rgba(255,255,255,0.8)',
             color: '#333',
             cursor: 'pointer',
+            fontSize: '0.75rem',
+            maxWidth: '145px',
           }}
         >
           {ROLES.map(r => (
@@ -133,7 +141,8 @@ function Nav() {
               background: 'rgba(255,255,255,0.8)',
               color: '#333',
               cursor: 'pointer',
-              maxWidth: '150px',
+              maxWidth: '140px',
+              fontSize: '0.75rem',
             }}
           >
             {designers.map(d => (
@@ -186,7 +195,7 @@ function App() {
   return (
     <HashRouter>
       <Nav />
-      <div style={{ paddingTop: '70px', width: '100%', minHeight: '100vh', boxSizing: 'border-box' }}>
+      <div style={{ paddingTop: '60px', width: '100%', minHeight: '100vh', boxSizing: 'border-box' }}>
         <Routes>
           <Route path="/" element={<HomePage />} />
           {FEATURES.BROWSE_PROJECTS && <Route path="/browse" element={<BrowsePage />} />}
@@ -194,6 +203,8 @@ function App() {
           {FEATURES.PORTFOLIO_DASHBOARD && <Route path="/dashboard" element={<InterestDashboard />} />}
           {FEATURES.TREND_CHART && <Route path="/trend/:id" element={<TrendPage />} />}
           {FEATURES.CREATE_PROJECT && <Route path="/create" element={<CreateProjectUI />} />}
+          {FEATURES.PUBLICATION_STATUS && <Route path="/publication" element={<PublicationManagementUI />} />}
+          {FEATURES.COMPANY_SETTINGS && <Route path="/company-settings" element={<CompanySettingsPage />} />}
           {FEATURES.CATEGORIES && <Route path="/categories" element={<CategoryManagementUI />} />}
           {FEATURES.MODERATION && <Route path="/moderation" element={<ModerationDashboard />} />}
         </Routes>
