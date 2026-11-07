@@ -1,12 +1,18 @@
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from django.db import transaction
 from django.db.models import Count, Q
 from django.db.models.functions import TruncDate, TruncWeek, TruncMonth
-from .models import InteriorDesignProject, InterestEvent
+from django.utils import timezone
+from accounts.models import User
+from .models import InteriorDesignProject, InterestEvent, ProjectFlag
 from .serializers import (
     InteriorDesignProjectSerializer,
     InterestEventSerializer,
+    ProjectFlagSerializer,
+    ProjectFlagCreateSerializer,
+    ProjectFlagModerationSerializer,
     SearchCriteriaDTO,
     ProjectSummaryDTO,
     ProjectDetailDTO,
@@ -263,6 +269,105 @@ class ProjectPublishView(APIView):
             'id': project.id,
             'status': project.status,
         })
+
+
+class ProjectFlagListCreateView(generics.ListCreateAPIView):
+    """Submit customer reports and list the moderation queue."""
+
+    permission_classes = [permissions.AllowAny]
+
+    def get_queryset(self):
+        queryset = ProjectFlag.objects.select_related(
+            'project',
+            'project__designer',
+            'reporter',
+            'reviewed_by',
+        )
+        requested_status = self.request.query_params.get(
+            'status',
+            ProjectFlag.Status.OPEN,
+        ).upper()
+
+        if requested_status != 'ALL':
+            queryset = queryset.filter(status=requested_status)
+
+        return queryset
+
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return ProjectFlagCreateSerializer
+        return ProjectFlagSerializer
+
+    def perform_create(self, serializer):
+        reporter = (
+            self.request.user
+            if self.request.user.is_authenticated
+            else None
+        )
+        serializer.save(reporter=reporter)
+
+
+class ProjectFlagModerationView(APIView):
+    """Remove a flagged project or dismiss the customer report."""
+
+    permission_classes = [permissions.AllowAny]
+
+    def patch(self, request, pk):
+        decision = ProjectFlagModerationSerializer(data=request.data)
+        decision.is_valid(raise_exception=True)
+
+        try:
+            with transaction.atomic():
+                flag = ProjectFlag.objects.select_for_update().select_related(
+                    'project',
+                    'project__designer',
+                    'reporter',
+                ).get(pk=pk)
+
+                if flag.status != ProjectFlag.Status.OPEN:
+                    return Response(
+                        {'error': 'This flag has already been reviewed.'},
+                        status=status.HTTP_409_CONFLICT,
+                    )
+
+                action = decision.validated_data['action']
+
+                if action == 'REMOVE':
+                    flag.project.status = (
+                        InteriorDesignProject.Status.REMOVED
+                    )
+                    flag.project.save(
+                        update_fields=['status', 'updated_at']
+                    )
+                    flag.status = ProjectFlag.Status.RESOLVED
+                else:
+                    flag.status = ProjectFlag.Status.DISMISSED
+
+                flag.moderation_note = decision.validated_data.get(
+                    'moderation_note',
+                    '',
+                ).strip()
+                flag.resolved_at = timezone.now()
+                flag.reviewed_by = (
+                    request.user
+                    if request.user.is_authenticated
+                    else None
+                )
+                flag.save(
+                    update_fields=[
+                        'status',
+                        'moderation_note',
+                        'resolved_at',
+                        'reviewed_by',
+                    ]
+                )
+        except ProjectFlag.DoesNotExist:
+            return Response(
+                {'error': 'Flag report not found.'},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        return Response(ProjectFlagSerializer(flag).data)
 
 
 class RecordViewView(APIView):

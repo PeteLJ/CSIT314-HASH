@@ -13,6 +13,7 @@ class InteriorDesignProject(models.Model):
         PUBLISHED = 'PUBLISHED', 'Published'
         UNPUBLISHED = 'UNPUBLISHED', 'Unpublished'
         ARCHIVED = 'ARCHIVED', 'Archived'
+        REMOVED = 'REMOVED', 'Removed by moderation'
 
     # Room type choices
     class RoomType(models.TextChoices):
@@ -64,6 +65,60 @@ class InteriorDesignProject(models.Model):
 
     def __str__(self):
         return f'{self.title} ({self.get_status_display()})'
+
+
+class ProjectFlag(models.Model):
+    """A customer report awaiting a Platform Manager decision."""
+
+    class Reason(models.TextChoices):
+        INAPPROPRIATE = 'INAPPROPRIATE', 'Inappropriate content'
+        MISLEADING = 'MISLEADING', 'Misleading information'
+        COPYRIGHT = 'COPYRIGHT', 'Copyright concern'
+        OTHER = 'OTHER', 'Other'
+
+    class Status(models.TextChoices):
+        OPEN = 'OPEN', 'Open'
+        RESOLVED = 'RESOLVED', 'Resolved - project removed'
+        DISMISSED = 'DISMISSED', 'Dismissed - project kept'
+
+    project = models.ForeignKey(
+        InteriorDesignProject,
+        on_delete=models.CASCADE,
+        related_name='flags',
+    )
+    reporter = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='submitted_project_flags',
+    )
+    reason = models.CharField(
+        max_length=24,
+        choices=Reason.choices,
+    )
+    details = models.TextField(blank=True)
+    status = models.CharField(
+        max_length=16,
+        choices=Status.choices,
+        default=Status.OPEN,
+    )
+    moderation_note = models.TextField(blank=True)
+    reviewed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='reviewed_project_flags',
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    resolved_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'{self.get_reason_display()} - {self.project.title}'
 
 
 # Tracks view and shortlist events on projects
