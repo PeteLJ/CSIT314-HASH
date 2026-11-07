@@ -4,13 +4,32 @@ from .models import InteriorDesignProject, InterestEvent
 
 class InteriorDesignProjectSerializer(serializers.ModelSerializer):
     designer_name = serializers.CharField(source='designer.username', read_only=True)
+    designer_property_types = serializers.SerializerMethodField()
+    designer_budget_range = serializers.SerializerMethodField()
 
     class Meta:
         model = InteriorDesignProject
         fields = ('id', 'title', 'description', 'style', 'room_type',
                   'budget_min', 'budget_max', 'status', 'category',
-                  'designer', 'designer_name', 'created_at', 'updated_at')
+                  'designer', 'designer_name', 'designer_property_types',
+                  'designer_budget_range', 'created_at', 'updated_at')
         read_only_fields = ('designer', 'status', 'created_at', 'updated_at')
+
+    def get_designer_property_types(self, obj):
+        try:
+            company = obj.designer.company_settings
+            return list(company.supported_property_types.values_list('name', flat=True))
+        except Exception:
+            return []
+
+    def get_designer_budget_range(self, obj):
+        try:
+            company = obj.designer.company_settings
+            if company.budget_minimum is not None and company.budget_maximum is not None:
+                return {'minimum': str(company.budget_minimum), 'maximum': str(company.budget_maximum)}
+        except Exception:
+            pass
+        return None
 
     def validate(self, attrs):
         budget_min = attrs.get(
