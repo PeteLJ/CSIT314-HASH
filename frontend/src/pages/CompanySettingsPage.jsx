@@ -81,8 +81,8 @@ export default function CompanySettingsPage() {
         <Typography variant="h6" gutterBottom sx={{ color: '#fff' }}>Accepted renovation budget range</Typography>
         <Typography sx={{ mb: 2, color: '#ccc' }}>Amounts in SGD.</Typography>
         <Stack direction={{ xs: 'column', sm: 'row' }} gap={2}>
-          <TextField required type="number" label="Minimum budget" value={minimum} onChange={e => setMinimum(e.target.value)} disabled={busy} slotProps={{ htmlInput: { min: 0, step: '0.01' } }} sx={{ '& .MuiOutlinedInput-root': { color: '#e0e0e0' }, '& .MuiInputLabel-root': { color: '#ccc' } }} />
-          <TextField required type="number" label="Maximum budget" value={maximum} onChange={e => setMaximum(e.target.value)} disabled={busy} slotProps={{ htmlInput: { min: 0, step: '0.01' } }} sx={{ '& .MuiOutlinedInput-root': { color: '#e0e0e0' }, '& .MuiInputLabel-root': { color: '#ccc' } }} />
+          <TextField required type="number" label="Min. Budget" value={minimum} onChange={e => setMinimum(e.target.value)} disabled={busy} slotProps={{ htmlInput: { min: 0, step: '0.01' } }} sx={{ '& .MuiOutlinedInput-root': { color: '#e0e0e0' }, '& .MuiInputLabel-root': { color: '#ccc' } }} />
+          <TextField required type="number" label="Max. Budget" value={maximum} onChange={e => setMaximum(e.target.value)} disabled={busy} slotProps={{ htmlInput: { min: 0, step: '0.01' } }} sx={{ '& .MuiOutlinedInput-root': { color: '#e0e0e0' }, '& .MuiInputLabel-root': { color: '#ccc' } }} />
         </Stack>
         <Stack direction="row" gap={2} sx={{ mt: 2 }}>
           <Button type="submit" variant="contained" disabled={busy}>Save budget</Button>

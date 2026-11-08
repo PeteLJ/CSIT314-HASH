@@ -18,6 +18,12 @@ category_names = ['Modern', 'Scandinavian', 'Industrial', 'Minimalist', 'Classic
 for name in category_names:
     ProjectCategory.objects.get_or_create(name=name)
 
+# Property types (for company settings)
+from accounts.models import PropertyType
+property_type_names = ['HDB', 'Condominium', 'Landed', 'Commercial', 'Bungalow']
+for name in property_type_names:
+    PropertyType.objects.get_or_create(name=name)
+
 # Users
 customers = []
 designers = []
