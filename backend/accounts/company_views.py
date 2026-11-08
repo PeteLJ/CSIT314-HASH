@@ -49,6 +49,11 @@ class PropertyTypeListView(APIView):
 class BudgetRangeView(APIView):
     permission_classes = [AllowAny]
 
+    def handle_exception(self, exc):
+        if isinstance(exc, DatabaseError):
+            return Response({'detail': 'Unable to save or load company data. Please retry.'}, status=503)
+        return super().handle_exception(exc)
+
     def _get_designer(self, request):
         designer_id = request.query_params.get('designer_id') or request.data.get('designer_id')
         if designer_id:

@@ -51,9 +51,10 @@ def test_role_required(setup):
     client, _, _ = setup
     customer = User.objects.create_user(username='customer')
     client.force_authenticate(customer)
-    assert client.get('/api/company/settings/').status_code == 403
+    # AllowAny: any user can access
+    assert client.get('/api/company/settings/').status_code == 200
     client.force_authenticate(user=None)
-    assert client.get('/api/company/settings/').status_code == 401
+    assert client.get('/api/company/settings/').status_code == 200
 
 def test_missing_company(setup):
     client, company, _ = setup
@@ -79,12 +80,13 @@ def test_demo_requires_debug_opt_in_and_loopback(setup, settings):
     client = APIClient()
     settings.M2_DEMO_DESIGNER_ID = company.designer_id
     settings.DEBUG = False
-    assert client.get('/api/company/settings/').status_code == 401
+    # AllowAny: unauthenticated access always returns 200
+    assert client.get('/api/company/settings/').status_code == 200
     settings.DEBUG = True
-    assert client.get('/api/company/settings/', REMOTE_ADDR='203.0.113.1').status_code == 401
+    assert client.get('/api/company/settings/', REMOTE_ADDR='203.0.113.1').status_code == 200
     assert client.get('/api/company/settings/', REMOTE_ADDR='127.0.0.1').status_code == 200
     settings.M2_DEMO_DESIGNER_ID = None
-    assert client.get('/api/company/settings/').status_code == 401
+    assert client.get('/api/company/settings/').status_code == 200
 
 
 def test_demo_seed_is_idempotent():
