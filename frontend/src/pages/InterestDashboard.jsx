@@ -8,7 +8,9 @@ function InterestDashboard() {
   const [designerId, setDesignerId] = useState(localStorage.getItem('designer_id') || '')
 
   const fetchData = (id) => {
-    const url = id ? `/analytics/portfolio/?designer_id=${id}` : '/analytics/portfolio/'
+    const query = new URLSearchParams({ _: Date.now().toString() })
+    if (id) query.set('designer_id', id)
+    const url = `/analytics/portfolio/?${query.toString()}`
     apiGet(url).then(d => {
       setData(d)
       setLoading(false)

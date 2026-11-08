@@ -12,19 +12,38 @@ function ProjectDetailPage() {
   const [designerProfile, setDesignerProfile] = useState(null)
   const [companyProfile, setCompanyProfile] = useState(null)
   const [showProfile, setShowProfile] = useState(false)
-  const viewRecorded = useRef(false)
+  const recordedProjectId = useRef(null)
+  const activeProjectId = useRef(null)
 
   useEffect(() => {
-    if (!viewRecorded.current) {
-      viewRecorded.current = true
-      apiPost(`/projects/${id}/record-view/`, {}).catch(() => {})
+    activeProjectId.current = id
+
+    const recordViewAndLoadLatestCount = async () => {
+      try {
+        // Record each project once per detail-page visit. Waiting for the POST
+        // prevents the following GET from returning the old count.
+        if (recordedProjectId.current !== id) {
+          recordedProjectId.current = id
+          await apiPost(`/projects/${id}/record-view/`, {})
+        }
+
+        const data = await apiGet(`/projects/${id}/view-count/?_=${Date.now()}`)
+        if (activeProjectId.current === id) setViewCount(data.view_count)
+      } catch (error) {
+        console.error('Unable to record or refresh the project view:', error)
+      }
     }
+
+    recordViewAndLoadLatestCount()
     apiGet(`/projects/${id}/`).then(data => {
       setProject(data)
       setLoading(false)
     }).catch(() => setLoading(false))
-    apiGet(`/projects/${id}/view-count/`).then(data => setViewCount(data.view_count)).catch(() => {})
     apiGet(`/projects/${id}/shortlist-count/`).then(data => setShortlistCount(data.shortlist_count)).catch(() => {})
+
+    return () => {
+      if (activeProjectId.current === id) activeProjectId.current = null
+    }
   }, [id])
 
   const handleViewDesignerProfile = () => {
