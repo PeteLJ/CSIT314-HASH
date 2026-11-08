@@ -3,7 +3,7 @@ from django.utils import timezone
 from django.conf import settings
 
 
-# Interior Design Project model - managed by Interior Designers
+# US-31: Browse Design Projects / US-35: View Project Details (Interior Design Project model)
 class InteriorDesignProject(models.Model):
     """Interior Design Project - managed by Interior Designers."""
 
@@ -57,7 +57,7 @@ class InteriorDesignProject(models.Model):
         ordering = ['-created_at']
 
     def countByCategory(self):
-        """Count projects in this category — matches naming guide."""
+        """Count projects in this category."""
         if self.category:
             return InteriorDesignProject.objects.filter(category=self.category).count()
         return 0
@@ -66,7 +66,7 @@ class InteriorDesignProject(models.Model):
         return f'{self.title} ({self.get_status_display()})'
 
 
-# Tracks view and shortlist events on projects
+# US-07: Views and Shortlist (InterestEvent model)
 class InterestEvent(models.Model):
     """Records an interest event (view or shortlist) on an Interior Design Project."""
 
@@ -100,3 +100,7 @@ class InterestEvent(models.Model):
 
     def __str__(self):
         return f'{self.get_event_type_display()} on {self.project.title} at {self.occurred_at}'
+
+    def getEventType(self):
+        """Get the event type."""
+        return self.event_type

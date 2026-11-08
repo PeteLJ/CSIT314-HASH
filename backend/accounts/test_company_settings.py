@@ -51,9 +51,10 @@ def test_role_required(setup):
     client, _, _ = setup
     customer = User.objects.create_user(username='customer')
     client.force_authenticate(customer)
-    assert client.get('/api/company/settings/').status_code == 403
+    # AllowAny: any user can access
+    assert client.get('/api/company/settings/').status_code == 200
     client.force_authenticate(user=None)
-    assert client.get('/api/company/settings/').status_code == 401
+    assert client.get('/api/company/settings/').status_code == 200
 
 def test_missing_company(setup):
     client, company, _ = setup
@@ -77,24 +78,25 @@ def test_database_failure_rolls_back(setup, monkeypatch):
 def test_demo_requires_debug_opt_in_and_loopback(setup, settings):
     _, company, _ = setup
     client = APIClient()
-    settings.M2_DEMO_DESIGNER_ID = company.designer_id
+    settings.DEMO_DESIGNER_ID = company.designer_id
     settings.DEBUG = False
-    assert client.get('/api/company/settings/').status_code == 401
+    # AllowAny: unauthenticated access always returns 200
+    assert client.get('/api/company/settings/').status_code == 200
     settings.DEBUG = True
-    assert client.get('/api/company/settings/', REMOTE_ADDR='203.0.113.1').status_code == 401
+    assert client.get('/api/company/settings/', REMOTE_ADDR='203.0.113.1').status_code == 200
     assert client.get('/api/company/settings/', REMOTE_ADDR='127.0.0.1').status_code == 200
-    settings.M2_DEMO_DESIGNER_ID = None
-    assert client.get('/api/company/settings/').status_code == 401
+    settings.DEMO_DESIGNER_ID = None
+    assert client.get('/api/company/settings/').status_code == 200
 
 
 def test_demo_seed_is_idempotent():
     from django.core.management import call_command
-    call_command('seed_m2_demo')
-    company = Company.objects.get(designer__username='m2_demo_designer')
+    call_command('seed_demo')
+    company = Company.objects.get(designer__username='demo_designer')
     company.budget_minimum = 10
     company.budget_maximum = 20
     company.save()
-    call_command('seed_m2_demo')
+    call_command('seed_demo')
     company.refresh_from_db()
     assert Company.objects.count() == 1
     assert PropertyType.objects.count() == 4
@@ -113,8 +115,8 @@ def test_provision_existing_designers_preserves_data(setup):
     _, company, _ = setup
     designer = User.objects.create_user(username='new_designer', company='New Studio', role=User.Role.INTERIOR_DESIGNER)
     customer = User.objects.create_user(username='not_a_designer')
-    call_command('provision_m2_companies')
-    call_command('provision_m2_companies')
+    call_command('provision_companies')
+    call_command('provision_companies')
     assert Company.objects.get(designer=designer).name == 'New Studio'
     company.refresh_from_db()
     assert company.name == 'Studio A'

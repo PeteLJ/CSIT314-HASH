@@ -4,13 +4,40 @@ from .models import InteriorDesignProject, InterestEvent
 
 class InteriorDesignProjectSerializer(serializers.ModelSerializer):
     designer_name = serializers.CharField(source='designer.username', read_only=True)
+    designer_company = serializers.SerializerMethodField()
+    designer_property_types = serializers.SerializerMethodField()
+    designer_budget_range = serializers.SerializerMethodField()
+
+    def get_designer_company(self, obj):
+        try:
+            return obj.designer.company_settings.name
+        except Exception:
+            return obj.designer.company or 'N/A'
 
     class Meta:
         model = InteriorDesignProject
         fields = ('id', 'title', 'description', 'style', 'room_type',
                   'budget_min', 'budget_max', 'status', 'category',
-                  'designer', 'designer_name', 'created_at', 'updated_at')
+                  'designer', 'designer_name', 'designer_company', 'designer_property_types',
+                  'designer_budget_range', 'created_at', 'updated_at')
         read_only_fields = ('designer', 'status', 'created_at', 'updated_at')
+
+    def get_designer_property_types(self, obj):
+        try:
+            company = obj.designer.company_settings
+            return list(company.supported_property_types.values_list('name', flat=True))
+        except Exception:
+            return []
+
+    def get_designer_budget_range(self, obj):
+        try:
+            company = obj.designer.company_settings
+            if company.budget_minimum is not None and company.budget_maximum is not None:
+                return {'minimum': str(company.budget_minimum), 'maximum': str(company.budget_maximum)}
+        except Exception:
+            pass
+        return None
+
     def validate(self, attrs):
         budget_min = attrs.get(
             'budget_min',
@@ -45,10 +72,10 @@ class InteriorDesignProjectSerializer(serializers.ModelSerializer):
         return attrs
 
 
-# --- DTOs (Data Transfer Objects) per naming guide ---
+# --- DTOs (Data Transfer Objects) ---
 
 class SearchCriteriaDTO(serializers.Serializer):
-    """Data shape for search/filter — not a model, just query params."""
+    """Search and filter parameters."""
     search_query = serializers.CharField(required=False, allow_blank=True)
     style = serializers.CharField(required=False, allow_blank=True)
     room_type = serializers.CharField(required=False, allow_blank=True)
@@ -56,12 +83,12 @@ class SearchCriteriaDTO(serializers.Serializer):
     budget_max = serializers.DecimalField(max_digits=10, decimal_places=2, required=False)
 
     def get_filters(self):
-        """Returns a dict of non-empty filters."""
+        """Return non-empty filters."""
         return {k: v for k, v in self.validated_data.items() if v is not None and v != ''}
 
 
 class ProjectSummaryDTO(serializers.Serializer):
-    """Data shape for browse project list items."""
+    """Project summary for browse list."""
     project_id = serializers.IntegerField(source='id')
     title = serializers.CharField()
     style = serializers.CharField()
@@ -73,7 +100,7 @@ class ProjectSummaryDTO(serializers.Serializer):
 
 
 class ProjectDetailDTO(serializers.Serializer):
-    """Data shape for project detail view."""
+    """Project detail view data."""
     project_id = serializers.IntegerField(source='id')
     title = serializers.CharField()
     description = serializers.CharField()
@@ -87,7 +114,7 @@ class ProjectDetailDTO(serializers.Serializer):
 
 
 class ProjectData(serializers.Serializer):
-    """Data shape for project creation — passed from UI to controller."""
+    """Project creation data."""
     title = serializers.CharField()
     description = serializers.CharField(required=False, allow_blank=True)
     renovation_budget = serializers.DecimalField(max_digits=10, decimal_places=2, required=False)
@@ -96,7 +123,7 @@ class ProjectData(serializers.Serializer):
 
 
 class InterestSummary(serializers.Serializer):
-    """Data shape for interest analytics — not a model, just a response shape."""
+    """Interest analytics data."""
     project_id = serializers.IntegerField()
     period = serializers.CharField()
     view_count = serializers.IntegerField()

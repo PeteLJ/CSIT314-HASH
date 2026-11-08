@@ -3,74 +3,54 @@ import { apiGet, apiPost } from '../api/client'
 
 // US-21: Create Interior Design Project
 function CreatePage() {
+  const [roomTypes, setRoomTypes] = useState([])
+
+  useEffect(() => {
+    apiGet('/room-types/').then(data => {
+      setRoomTypes(Array.isArray(data) ? data : [])
+    }).catch(() => {})
+  }, [])
 
   // Project form data
   const [form, setForm] = useState({
     title: '',
     description: '',
     style: '',
-    room_type: '',
-    budget_min: '',
-    budget_max: '',
     category: '',
+    room_type: '',
+    cost: '',
   })
 
   // Category data
-  const [categories, setCategories] = useState([])
-  const [loadingCategories, setLoadingCategories] = useState(true)
-  const [categoryError, setCategoryError] = useState('')
 
   // Form submission states
   const [submitting, setSubmitting] = useState(false)
   const [success, setSuccess] = useState('')
   const [error, setError] = useState('')
 
-  // Available design styles
-  const styles = [
-    'Modern',
-    'Scandinavian',
-    'Industrial',
-    'Minimalist',
-    'Classic',
-    'Contemporary',
-  ]
+  // Load project categories from Django backend (used as Style options)
+  const [categories, setCategories] = useState([])
+  const [loadingCategories, setLoadingCategories] = useState(true)
 
-  // Load project categories from Django backend
   useEffect(() => {
     let active = true
-
     const loadCategories = async () => {
       try {
         const data = await apiGet('/categories/')
-
-        const list = Array.isArray(data)
-          ? data
-          : data.results || []
-
-        if (active) {
-          setCategories(list)
-          setCategoryError('')
-        }
-
+        const list = Array.isArray(data) ? data : data.results || []
+        if (active) setCategories(list)
       } catch (err) {
-        if (active) {
-          setCategoryError('Failed to load project categories.')
-          console.error('Failed to load categories:', err)
-        }
-
+        console.error('Failed to load categories:', err)
       } finally {
-        if (active) {
-          setLoadingCategories(false)
-        }
+        if (active) setLoadingCategories(false)
       }
     }
-
     loadCategories()
-
-    return () => {
-      active = false
-    }
+    return () => { active = false }
   }, [])
+
+  // Available design styles (from categories)
+  const styles = categories.map(c => c.name)
 
   // Update form data when the user changes an input
   const handleChange = (e) => {
@@ -92,34 +72,15 @@ function CreatePage() {
       return 'Project title is required.'
     }
 
-    const budgetMin = form.budget_min === ''
+    const cost = form.cost === ''
       ? null
-      : Number(form.budget_min)
-
-    const budgetMax = form.budget_max === ''
-      ? null
-      : Number(form.budget_max)
+      : Number(form.cost)
 
     if (
-      budgetMin !== null &&
-      (!Number.isFinite(budgetMin) || budgetMin < 0)
+      cost !== null &&
+      (!Number.isFinite(cost) || cost < 0)
     ) {
-      return 'Minimum budget must be a valid non-negative number.'
-    }
-
-    if (
-      budgetMax !== null &&
-      (!Number.isFinite(budgetMax) || budgetMax < 0)
-    ) {
-      return 'Maximum budget must be a valid non-negative number.'
-    }
-
-    if (
-      budgetMin !== null &&
-      budgetMax !== null &&
-      budgetMax < budgetMin
-    ) {
-      return 'Maximum budget cannot be lower than minimum budget.'
+      return 'Cost must be a valid non-negative number.'
     }
 
     return ''
@@ -152,14 +113,15 @@ function CreatePage() {
         title: form.title.trim(),
         description: form.description.trim(),
         style: form.style,
-        room_type: form.room_type,
-        budget_min: form.budget_min === ''
-          ? null
-          : form.budget_min,
-        budget_max: form.budget_max === ''
-          ? null
-          : form.budget_max,
         category: form.category || null,
+        room_type: form.room_type,
+        budget_min: form.cost === ''
+          ? null
+          : form.cost,
+        budget_max: form.cost === ''
+          ? null
+          : form.cost,
+        designer_id: localStorage.getItem('designer_id') || '',
       }
 
       // Create the project through ProjectController
@@ -178,8 +140,7 @@ function CreatePage() {
         room_type: '',
         budget_min: '',
         budget_max: '',
-        category: '',
-      })
+          })
 
     } catch (err) {
       setError(
@@ -192,23 +153,23 @@ function CreatePage() {
   }
 
   return (
-    <div style={{ padding: '0 2rem' }}>
+    <div style={{ maxWidth: '700px', margin: '0 auto', padding: '0 2rem', textAlign: 'left' }}>
 
-      <h1>Create New Design Project</h1>
+      <h1 style={{ textAlign: 'center' }}>Create New Design Project</h1>
 
-      <p>
+      <p style={{ color: '#ccc' }}>
         Enter your project details below.
         New projects will be saved as Draft.
       </p>
 
       <form
         onSubmit={handleSubmit}
-        style={{ maxWidth: '600px' }}
+        style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}
       >
 
         {/* Project Title */}
-        <div style={{ marginBottom: '1rem' }}>
-          <label htmlFor="title">Title: </label>
+        <div>
+          <label htmlFor="title" style={{ display: 'block', marginBottom: '0.25rem', color: '#e0e0e0' }}>Title: </label>
 
           <input
             id="title"
@@ -218,13 +179,13 @@ function CreatePage() {
             onChange={handleChange}
             required
             maxLength={255}
-            style={{ width: '100%' }}
+            style={{ width: '50%', padding: '0.5rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.3)', background: 'rgba(255,255,255,0.05)', color: '#e0e0e0' }}
           />
         </div>
 
         {/* Project Description */}
         <div style={{ marginBottom: '1rem' }}>
-          <label htmlFor="description">Description: </label>
+          <label htmlFor="description" style={{ display: 'block', marginBottom: '0.25rem', color: '#e0e0e0' }}>Description: </label>
 
           <textarea
             id="description"
@@ -232,121 +193,73 @@ function CreatePage() {
             value={form.description}
             onChange={handleChange}
             rows={4}
-            style={{ width: '100%' }}
+            style={{ width: '100%', padding: '0.5rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.3)', background: 'rgba(255,255,255,0.05)', color: '#e0e0e0' }}
           />
         </div>
 
         {/* Design Style */}
         <div style={{ marginBottom: '1rem' }}>
-          <label htmlFor="style">Style: </label>
+          <label htmlFor="style" style={{ display: 'block', marginBottom: '0.25rem', color: '#e0e0e0' }}>Style: </label>
 
           <select
             id="style"
             name="style"
             value={form.style}
-            onChange={handleChange}
-            style={{ width: '100%' }}
+            onChange={(e) => {
+              const selected = categories.find(c => c.name === e.target.value)
+              setForm(prev => ({ ...prev, style: e.target.value, category: selected ? selected.id : '' }))
+            }}
+            disabled={loadingCategories}
+            style={{ width: '25%', padding: '0.5rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.3)', background: 'rgba(255,255,255,0.05)', color: '#e0e0e0' }}
           >
-            <option value="">Select style</option>
+            <option value="">
+              {loadingCategories ? 'Loading...' : 'Select style'}
+            </option>
 
             {styles.map(style => (
-              <option key={style} value={style}>
+              <option key={style} value={style} style={{ background: '#fff', color: '#000' }}>
                 {style}
               </option>
             ))}
           </select>
         </div>
 
-        {/* Project Category */}
-        <div style={{ marginBottom: '1rem' }}>
-          <label htmlFor="category">Project Category: </label>
-
-          <select
-            id="category"
-            name="category"
-            value={form.category}
-            onChange={handleChange}
-            disabled={loadingCategories}
-            style={{ width: '100%' }}
-          >
-            <option value="">
-              {loadingCategories
-                ? 'Loading categories...'
-                : 'Select category'}
-            </option>
-
-            {categories.map(category => (
-              <option
-                key={category.id}
-                value={category.id}
-              >
-                {category.name}
-              </option>
-            ))}
-          </select>
-
-          {categoryError && (
-            <p style={{ color: 'red' }}>
-              {categoryError}
-            </p>
-          )}
-        </div>
-
         {/* Room Type */}
         <div style={{ marginBottom: '1rem' }}>
-          <label htmlFor="room_type">Room Type: </label>
+          <label htmlFor="room_type" style={{ display: 'block', marginBottom: '0.25rem', color: '#e0e0e0' }}>Room Type: </label>
 
           <select
             id="room_type"
             name="room_type"
             value={form.room_type}
             onChange={handleChange}
-            style={{ width: '100%' }}
+            style={{ width: '25%', padding: '0.5rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.3)', background: 'rgba(255,255,255,0.05)', color: '#e0e0e0' }}
           >
-            <option value="">Select room type</option>
-            <option value="LIVING_ROOM">Living Room</option>
-            <option value="BEDROOM">Bedroom</option>
-            <option value="KITCHEN">Kitchen</option>
-            <option value="BATHROOM">Bathroom</option>
-            <option value="WHOLE_UNIT">Whole Unit</option>
+            <option value="" style={{ background: '#fff', color: '#000' }}>Select room type</option>
+            {roomTypes.map(rt => (
+              <option key={rt.value} value={rt.value} style={{ background: '#fff', color: '#000' }}>{rt.label}</option>
+            ))}
           </select>
         </div>
 
-        {/* Minimum Renovation Budget */}
+        {/* Cost */}
         <div style={{ marginBottom: '1rem' }}>
-          <label htmlFor="budget_min">Budget Min: </label>
+          <label htmlFor="cost" style={{ display: 'block', marginBottom: '0.25rem', color: '#e0e0e0' }}>Cost: </label>
 
           <input
-            id="budget_min"
-            name="budget_min"
+            id="cost"
+            name="cost"
             type="number"
             min="0"
             step="0.01"
-            value={form.budget_min}
+            value={form.cost}
             onChange={handleChange}
-            style={{ width: '100%' }}
+            style={{ width: '25%', padding: '0.5rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.3)', background: 'rgba(255,255,255,0.05)', color: '#e0e0e0' }}
           />
         </div>
 
-        {/* Maximum Renovation Budget */}
-        <div style={{ marginBottom: '1rem' }}>
-          <label htmlFor="budget_max">Budget Max: </label>
-
-          <input
-            id="budget_max"
-            name="budget_max"
-            type="number"
-            min="0"
-            step="0.01"
-            value={form.budget_max}
-            onChange={handleChange}
-            style={{ width: '100%' }}
-          />
-        </div>
-
-        {/* Submission Error */}
         {error && (
-          <p role="alert" style={{ color: 'red' }}>
+          <p role="alert" style={{ color: '#ff6b6b', fontSize: '0.9rem' }}>
             {error}
           </p>
         )}
@@ -355,13 +268,23 @@ function CreatePage() {
         <button
           type="submit"
           disabled={submitting}
+          style={{
+            padding: '0.6rem 1.5rem',
+            borderRadius: '8px',
+            border: 'none',
+            background: '#c4704b',
+            color: 'white',
+            cursor: submitting ? 'not-allowed' : 'pointer',
+            opacity: submitting ? 0.6 : 1,
+            fontWeight: 'bold',
+          }}
         >
           {submitting ? 'Creating...' : 'Create Project'}
         </button>
 
         {/* Creation Success Message */}
         {success && (
-          <p role="status" style={{ color: 'green' }}>
+          <p role="status" style={{ color: '#4caf50', fontSize: '0.9rem' }}>
             {success}
           </p>
         )}

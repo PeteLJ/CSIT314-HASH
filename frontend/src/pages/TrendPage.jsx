@@ -88,9 +88,9 @@ function TrendPage() {
       <div style={{ marginBottom: '1rem', marginTop: '1rem' }}>
         <label>Period: </label>
         <select value={period} onChange={e => setPeriod(e.target.value)} style={{ padding: '0.5rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.3)', background: 'rgba(255,255,255,0.05)', color: '#e0e0e0' }}>
-          <option value="daily">Daily</option>
-          <option value="weekly">Weekly</option>
-          <option value="monthly">Monthly</option>
+          <option value="daily" style={{ background: '#fff', color: '#000' }}>Daily</option>
+          <option value="weekly" style={{ background: '#fff', color: '#000' }}>Weekly</option>
+          <option value="monthly" style={{ background: '#fff', color: '#000' }}>Monthly</option>
         </select>
       </div>
       <p style={{ color: '#888', fontSize: '0.9rem' }}>Designer: {data.designer_name}</p>

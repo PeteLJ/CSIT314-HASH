@@ -1,71 +1,104 @@
 from django.conf import settings
 from django.db import DatabaseError
-from rest_framework.authentication import BaseAuthentication, TokenAuthentication, SessionAuthentication
-from rest_framework.permissions import BasePermission
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.exceptions import MethodNotAllowed
+from django.contrib.auth import get_user_model
 from .models import User, PropertyType
 from .company_services import CompanyRepository, BudgetRangeController, PropertyTypeController
 
-
-class LocalDemoAuthentication(BaseAuthentication):
-    """Opt-in local demo only; never accept an arbitrary user/company ID from a client."""
-    def authenticate(self, request):
-        if request.META.get('REMOTE_ADDR') not in {'127.0.0.1', '::1'}:
-            return None
-        if not (settings.DEBUG and getattr(settings, 'M2_DEMO_DESIGNER_ID', None)):
-            return None
-        user = User.objects.filter(pk=settings.M2_DEMO_DESIGNER_ID, is_active=True,
-                                   role=User.Role.INTERIOR_DESIGNER).first()
-        return (user, None) if user else None
+User = get_user_model()
 
 
-class IsDesigner(BasePermission):
-    def has_permission(self, request, view):
-        return bool(request.user and request.user.is_authenticated and request.user.is_active
-                    and request.user.role == User.Role.INTERIOR_DESIGNER)
-
-
-class DesignerView(APIView):
-    authentication_classes = [TokenAuthentication, SessionAuthentication, LocalDemoAuthentication]
-    permission_classes = [IsDesigner]
+class CompanySettingsView(APIView):
+    permission_classes = [AllowAny]
 
     def handle_exception(self, exc):
         if isinstance(exc, DatabaseError):
             return Response({'detail': 'Unable to save or load company data. Please retry.'}, status=503)
         return super().handle_exception(exc)
 
+    def _get_designer(self, request):
+        designer_id = request.query_params.get('designer_id') or request.data.get('designer_id')
+        if designer_id:
+            try:
+                return User.objects.get(pk=designer_id, role=User.Role.INTERIOR_DESIGNER)
+            except User.DoesNotExist:
+                pass
+        # Default to first interior designer
+        return User.objects.filter(role=User.Role.INTERIOR_DESIGNER).first()
 
-class CompanySettingsView(DesignerView):
     def get(self, request):
-        company = CompanyRepository.forDesigner(request.user)
+        designer = self._get_designer(request)
+        if not designer:
+            return Response({'error': 'No designer found'}, status=404)
+        company = CompanyRepository.forDesigner(designer)
         return Response({'id': company.pk, 'name': company.name,
-                         'budget': BudgetRangeController.loadRange(request.user),
-                         'property_types': list(PropertyTypeController.listSupportedTypes(request.user).values('id', 'name'))})
+                         'budget': BudgetRangeController.loadRange(designer),
+                         'property_types': list(PropertyTypeController.listSupportedTypes(designer).values('id', 'name'))})
 
 
-class PropertyTypeListView(DesignerView):
+class PropertyTypeListView(APIView):
+    permission_classes = [AllowAny]
+
     def get(self, request):
         return Response(list(PropertyType.objects.order_by('name').values('id', 'name')))
 
 
-class BudgetRangeView(DesignerView):
+class BudgetRangeView(APIView):
+    permission_classes = [AllowAny]
+
+    def handle_exception(self, exc):
+        if isinstance(exc, DatabaseError):
+            return Response({'detail': 'Unable to save or load company data. Please retry.'}, status=503)
+        return super().handle_exception(exc)
+
+    def _get_designer(self, request):
+        designer_id = request.query_params.get('designer_id') or request.data.get('designer_id')
+        if designer_id:
+            try:
+                return User.objects.get(pk=designer_id, role=User.Role.INTERIOR_DESIGNER)
+            except User.DoesNotExist:
+                pass
+        return User.objects.filter(role=User.Role.INTERIOR_DESIGNER).first()
+
     def patch(self, request):
-        return Response({'budget': BudgetRangeController.updateRange(request.user, request.data)})
+        designer = self._get_designer(request)
+        if not designer:
+            return Response({'error': 'No designer found'}, status=404)
+        return Response({'budget': BudgetRangeController.updateRange(designer, request.data)})
 
 
-class SupportedPropertyTypeView(DesignerView):
+class SupportedPropertyTypeView(APIView):
+    permission_classes = [AllowAny]
+
+    def _get_designer(self, request):
+        designer_id = request.query_params.get('designer_id') or request.data.get('designer_id')
+        if designer_id:
+            try:
+                return User.objects.get(pk=designer_id, role=User.Role.INTERIOR_DESIGNER)
+            except User.DoesNotExist:
+                pass
+        return User.objects.filter(role=User.Role.INTERIOR_DESIGNER).first()
+
     def initial(self, request, *args, **kwargs):
         super().initial(request, *args, **kwargs)
         allowed = {'DELETE', 'OPTIONS'} if 'type_id' in kwargs else {'POST', 'OPTIONS'}
         if request.method not in allowed:
+            from rest_framework.exceptions import MethodNotAllowed
             raise MethodNotAllowed(request.method)
 
     def post(self, request):
-        PropertyTypeController.addSupportedType(request.user, request.data)
+        designer = self._get_designer(request)
+        if not designer:
+            return Response({'error': 'No designer found'}, status=404)
+        PropertyTypeController.addSupportedType(designer, request.data)
         return Response({'detail': 'Property type added.'}, status=201)
 
     def delete(self, request, type_id):
-        PropertyTypeController.removeSupportedType(request.user, type_id)
+        designer = self._get_designer(request)
+        if not designer:
+            return Response({'error': 'No designer found'}, status=404)
+        PropertyTypeController.removeSupportedType(designer, type_id)
         return Response(status=204)

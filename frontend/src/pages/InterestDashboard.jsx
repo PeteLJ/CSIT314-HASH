@@ -80,7 +80,7 @@ function InterestDashboard() {
               {data.projects.map((p, i) => (
                 <tr key={p.id}>
                   <td>{i + 1}</td>
-                  <td><Link to={`/trend/${p.id}`}>{p.title}</Link></td>
+                  <td><Link to={`/trend/${p.id}`} style={{ textDecoration: 'none' }}>{p.title}</Link></td>
                   <td>{p.style}</td>
                   <td>{p.status}</td>
                   <td>{p.view_count}</td>

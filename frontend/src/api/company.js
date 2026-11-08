@@ -1,9 +1,15 @@
-const base = (import.meta.env?.VITE_API_BASE_URL || 'https://petelj.pythonanywhere.com/api').replace(/\/$/, '')
-export async function companyRequest(path, method = 'GET', data) {
-  const token = sessionStorage.getItem('apiToken')
-  const response = await fetch(`${base}${path}`, {
+// API base URL - uses localhost in development, PythonAnywhere in production
+const API_BASE = window.location.hostname === 'localhost'
+  ? 'http://127.0.0.1:8000/api'
+  : 'https://petelj.pythonanywhere.com/api'
+
+export async function companyRequest(path, method = 'GET', data, designerId) {
+  const id = designerId || localStorage.getItem('designer_id') || ''
+  const separator = path.includes('?') ? '&' : '?'
+  const url = id ? `${API_BASE}${path}${separator}designer_id=${id}` : `${API_BASE}${path}`
+  const response = await fetch(url, {
     method,
-    headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Token ${token}` } : {}) },
+    headers: { 'Content-Type': 'application/json' },
     ...(data === undefined ? {} : { body: JSON.stringify(data) }),
   })
   const payload = response.status === 204 ? null : await response.json().catch(() => null)
