@@ -70,7 +70,7 @@ export default function CompanySettingsPage() {
           {company.property_types.map(t => <Chip key={t.id} label={t.name} disabled={busy} onDelete={() => setRemove(t)} sx={{ background: 'rgba(255,255,255,0.1)', color: '#e0e0e0' }} />)}
         </Stack>
         <Stack direction={{ xs: 'column', sm: 'row' }} gap={2}>
-          <TextField select label="Property type" value={typeId} onChange={e => setTypeId(e.target.value)} disabled={busy} sx={{ minWidth: 240, '& .MuiOutlinedInput-root': { color: '#e0e0e0' }, '& .MuiInputLabel-root': { color: '#ccc' } }}>
+          <TextField select label="Property type" value={typeId} onChange={e => setTypeId(e.target.value)} disabled={busy} sx={{ minWidth: 240, '& .MuiOutlinedInput-root': { color: '#e0e0e0', background: 'rgba(255,255,255,0.05)' }, '& .MuiInputLabel-root': { color: '#ccc' }, '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.3)' } }}>
             {choices.map(t => <MenuItem key={t.id} value={t.id}>{t.name}</MenuItem>)}
           </TextField>
           <Button variant="contained" disabled={busy || !typeId} onClick={() => mutate('/company/property-types/', 'POST', { type_id: typeId }, 'Property type added.')}>Add type</Button>
@@ -81,8 +81,8 @@ export default function CompanySettingsPage() {
         <Typography variant="h6" gutterBottom sx={{ color: '#fff' }}>Accepted renovation budget range</Typography>
         <Typography sx={{ mb: 2, color: '#ccc' }}>Amounts in SGD.</Typography>
         <Stack direction={{ xs: 'column', sm: 'row' }} gap={2}>
-          <TextField required type="number" label="Min. Budget" value={minimum} onChange={e => setMinimum(e.target.value)} disabled={busy} slotProps={{ htmlInput: { min: 0, step: '0.01' } }} sx={{ '& .MuiOutlinedInput-root': { color: '#e0e0e0' }, '& .MuiInputLabel-root': { color: '#ccc' } }} />
-          <TextField required type="number" label="Max. Budget" value={maximum} onChange={e => setMaximum(e.target.value)} disabled={busy} slotProps={{ htmlInput: { min: 0, step: '0.01' } }} sx={{ '& .MuiOutlinedInput-root': { color: '#e0e0e0' }, '& .MuiInputLabel-root': { color: '#ccc' } }} />
+          <TextField required type="number" label="Min. Budget" value={minimum} onChange={e => setMinimum(e.target.value)} disabled={busy} slotProps={{ htmlInput: { min: 0, step: '0.01' } }} sx={{ '& .MuiOutlinedInput-root': { color: '#e0e0e0', background: 'rgba(255,255,255,0.05)' }, '& .MuiInputLabel-root': { color: '#ccc' }, '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.3)' } }} />
+          <TextField required type="number" label="Max. Budget" value={maximum} onChange={e => setMaximum(e.target.value)} disabled={busy} slotProps={{ htmlInput: { min: 0, step: '0.01' } }} sx={{ '& .MuiOutlinedInput-root': { color: '#e0e0e0', background: 'rgba(255,255,255,0.05)' }, '& .MuiInputLabel-root': { color: '#ccc' }, '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.3)' } }} />
         </Stack>
         <Stack direction="row" gap={2} sx={{ mt: 2 }}>
           <Button type="submit" variant="contained" disabled={busy}>Save budget</Button>
