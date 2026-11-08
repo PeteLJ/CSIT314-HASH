@@ -69,11 +69,11 @@ export default function CompanySettingsPage() {
           {company.property_types.length === 0 && <Typography sx={{ color: '#ccc' }}>No property types selected.</Typography>}
           {company.property_types.map(t => <Chip key={t.id} label={t.name} disabled={busy} onDelete={() => setRemove(t)} sx={{ background: 'rgba(255,255,255,0.1)', color: '#e0e0e0' }} />)}
         </Stack>
-        <Stack direction={{ xs: 'column', sm: 'row' }} gap={2}>
+        <Stack direction={{ xs: 'column', sm: 'row' }} gap={3}>
           <TextField select label="Property type" value={typeId} onChange={e => setTypeId(e.target.value)} disabled={busy} sx={{ minWidth: 160, '& .MuiOutlinedInput-root': { color: '#e0e0e0', background: 'rgba(255,255,255,0.05)' }, '& .MuiInputLabel-root': { color: '#ccc' }, '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.3)' } }}>
             {choices.map(t => <MenuItem key={t.id} value={t.id} sx={{ color: '#e0e0e0' }}>{t.name}</MenuItem>)}
           </TextField>
-          <Button disabled={busy || !typeId} onClick={() => mutate('/company/property-types/', 'POST', { type_id: typeId }, 'Property type added.')} sx={{ padding: '0.5rem 1rem', borderRadius: '8px', border: 'none', background: '#c4704b', color: 'white', cursor: 'pointer', fontWeight: 'bold', '&:hover': { background: '#a85a3a' }, '&:disabled': { opacity: 0.6, cursor: 'not-allowed' } }}>Add type</Button>
+          <Button disabled={busy || !typeId} onClick={() => mutate('/company/property-types/', 'POST', { type_id: typeId }, 'Property type added.')} sx={{ padding: '0.35rem 0.75rem', borderRadius: '8px', border: 'none', background: '#c4704b', color: 'white', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.85rem', '&:hover': { background: '#a85a3a' }, '&:disabled': { opacity: 0.6, cursor: 'not-allowed' } }}>Add type</Button>
         </Stack>
         {choices.length === 0 && <Typography sx={{ mt: 2, color: '#ccc' }}>No additional types available.</Typography>}
       </Paper>
@@ -84,16 +84,16 @@ export default function CompanySettingsPage() {
           <TextField required type="number" label="Min. Budget" value={minimum} onChange={e => setMinimum(e.target.value)} disabled={busy} slotProps={{ htmlInput: { min: 0, step: '0.01' } }} sx={{ maxWidth: 160, '& .MuiOutlinedInput-root': { color: '#e0e0e0', background: 'rgba(255,255,255,0.05)' }, '& .MuiInputLabel-root': { color: '#ccc' }, '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.3)' } }} />
           <TextField required type="number" label="Max. Budget" value={maximum} onChange={e => setMaximum(e.target.value)} disabled={busy} slotProps={{ htmlInput: { min: 0, step: '0.01' } }} sx={{ maxWidth: 160, '& .MuiOutlinedInput-root': { color: '#e0e0e0', background: 'rgba(255,255,255,0.05)' }, '& .MuiInputLabel-root': { color: '#ccc' }, '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.3)' } }} />
         </Stack>
-        <Stack direction="row" gap={2} sx={{ mt: 2 }}>
-          <Button type="submit" disabled={busy} sx={{ padding: '0.5rem 1rem', borderRadius: '8px', border: 'none', background: '#c4704b', color: 'white', cursor: 'pointer', fontWeight: 'bold', '&:hover': { background: '#a85a3a' }, '&:disabled': { opacity: 0.6, cursor: 'not-allowed' } }}>Save budget</Button>
-          <Button disabled={busy} onClick={() => { setMinimum(company.budget?.minimum ?? ''); setMaximum(company.budget?.maximum ?? ''); setError('') }} sx={{ padding: '0.5rem 1rem', borderRadius: '8px', border: '1px solid #ccc', background: 'rgba(255,255,255,0.05)', color: '#ccc', cursor: 'pointer', fontWeight: 'bold', '&:hover': { background: 'rgba(255,255,255,0.1)' }, '&:disabled': { opacity: 0.6, cursor: 'not-allowed' } }}>Cancel changes</Button>
+        <Stack direction="row" gap={3} sx={{ mt: 2 }}>
+          <Button type="submit" disabled={busy} sx={{ padding: '0.35rem 0.75rem', borderRadius: '8px', border: 'none', background: '#c4704b', color: 'white', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.85rem', '&:hover': { background: '#a85a3a' }, '&:disabled': { opacity: 0.6, cursor: 'not-allowed' } }}>Save budget</Button>
+          <Button disabled={busy} onClick={() => { setMinimum(company.budget?.minimum ?? ''); setMaximum(company.budget?.maximum ?? ''); setError('') }} sx={{ padding: '0.35rem 0.75rem', borderRadius: '8px', border: '1px solid #ccc', background: 'rgba(255,255,255,0.05)', color: '#ccc', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.85rem', '&:hover': { background: 'rgba(255,255,255,0.1)' }, '&:disabled': { opacity: 0.6, cursor: 'not-allowed' } }}>Cancel changes</Button>
         </Stack>
       </Paper>
     </Stack>}
     <Dialog open={Boolean(remove)} onClose={() => !busy && setRemove(null)}>
       <DialogTitle>Remove supported property type?</DialogTitle>
       <DialogContent>Remove {remove?.name} from your company's supported types?</DialogContent>
-      <DialogActions><Button disabled={busy} onClick={() => setRemove(null)}>Cancel</Button><Button color="error" disabled={busy} onClick={() => mutate(`/company/property-types/${remove.id}/`, 'DELETE', undefined, 'Property type removed.')}>Remove</Button></DialogActions>
+      <DialogActions><Button disabled={busy} onClick={() => setRemove(null)} sx={{ color: '#ccc', border: '1px solid #ccc', padding: '0.35rem 0.75rem', borderRadius: '8px', fontSize: '0.85rem' }}>Cancel</Button><Button disabled={busy} onClick={() => mutate(`/company/property-types/${remove.id}/`, 'DELETE', undefined, 'Property type removed.')} sx={{ padding: '0.35rem 0.75rem', borderRadius: '8px', border: 'none', background: '#ff6b6b', color: 'white', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.85rem', '&:hover': { background: '#e55555' }, '&:disabled': { opacity: 0.6, cursor: 'not-allowed' } }}>Remove</Button></DialogActions>
     </Dialog>
   </Box>
 }
