@@ -98,7 +98,7 @@ function Nav() {
                 textDecoration: 'none',
                 padding: '0.2rem 0.3rem',
                 borderRadius: '4px',
-                fontSize: '0.9rem',
+                fontSize: '1rem',
                 whiteSpace: 'nowrap',
                 background: hoveredLink === link.to ? 'rgba(0,0,0,0.1)' : 'transparent',
                 transition: 'background 0.2s',
@@ -121,7 +121,7 @@ function Nav() {
             background: 'rgba(255,255,255,0.8)',
             color: '#333',
             cursor: 'pointer',
-            fontSize: '0.75rem',
+            fontSize: '0.85rem',
             maxWidth: '145px',
           }}
         >
@@ -142,7 +142,7 @@ function Nav() {
               color: '#333',
               cursor: 'pointer',
               maxWidth: '140px',
-              fontSize: '0.75rem',
+              fontSize: '0.85rem',
             }}
           >
             {designers.map(d => (

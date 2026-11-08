@@ -74,7 +74,7 @@ function ProjectDetailPage() {
       {showProfile && designerProfile && (
         <div style={{ marginTop: '0.5rem', padding: '0.75rem', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', fontSize: '0.9rem' }}>
             <p style={{ margin: '0.25rem 0' }}><strong>Username:</strong> {designerProfile.username}</p>
-            <p style={{ margin: '0.25rem 0' }}><strong>Company:</strong> {designerProfile.company || 'N/A'}</p>
+            <p style={{ margin: '0.25rem 0' }}><strong>Company:</strong> {companyProfile ? companyProfile.name : (designerProfile.company || 'N/A')}</p>
             {companyProfile && (
               <>
                 <p style={{ margin: '0.25rem 0' }}><strong>Supported Property Types:</strong> {companyProfile.property_types && companyProfile.property_types.length > 0 ? companyProfile.property_types.map(t => t.name).join(', ') : 'None set'}</p>

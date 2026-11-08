@@ -4,14 +4,21 @@ from .models import InteriorDesignProject, InterestEvent
 
 class InteriorDesignProjectSerializer(serializers.ModelSerializer):
     designer_name = serializers.CharField(source='designer.username', read_only=True)
+    designer_company = serializers.SerializerMethodField()
     designer_property_types = serializers.SerializerMethodField()
     designer_budget_range = serializers.SerializerMethodField()
+
+    def get_designer_company(self, obj):
+        try:
+            return obj.designer.company_settings.name
+        except Exception:
+            return obj.designer.company or 'N/A'
 
     class Meta:
         model = InteriorDesignProject
         fields = ('id', 'title', 'description', 'style', 'room_type',
                   'budget_min', 'budget_max', 'status', 'category',
-                  'designer', 'designer_name', 'designer_property_types',
+                  'designer', 'designer_name', 'designer_company', 'designer_property_types',
                   'designer_budget_range', 'created_at', 'updated_at')
         read_only_fields = ('designer', 'status', 'created_at', 'updated_at')
 
