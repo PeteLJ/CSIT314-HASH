@@ -71,13 +71,13 @@ export default function CompanySettingsPage() {
         </Stack>
         <Stack direction={{ xs: 'column', sm: 'row' }} gap={2}>
           <TextField select label="Property type" value={typeId} onChange={e => setTypeId(e.target.value)} disabled={busy} sx={{ minWidth: 240, '& .MuiOutlinedInput-root': { color: '#e0e0e0', background: 'rgba(255,255,255,0.05)' }, '& .MuiInputLabel-root': { color: '#ccc' }, '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.3)' } }}>
-            {choices.map(t => <MenuItem key={t.id} value={t.id}>{t.name}</MenuItem>)}
+            {choices.map(t => <MenuItem key={t.id} value={t.id} sx={{ color: '#e0e0e0' }}>{t.name}</MenuItem>)}
           </TextField>
           <Button variant="contained" disabled={busy || !typeId} onClick={() => mutate('/company/property-types/', 'POST', { type_id: typeId }, 'Property type added.')}>Add type</Button>
         </Stack>
         {choices.length === 0 && <Typography sx={{ mt: 2, color: '#ccc' }}>No additional types available.</Typography>}
       </Paper>
-      <Paper component="form" onSubmit={saveBudget} sx={{ p: 3 }}>
+      <Paper component="form" onSubmit={saveBudget} sx={{ p: 3, background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)' }}>
         <Typography variant="h6" gutterBottom sx={{ color: '#fff' }}>Accepted renovation budget range</Typography>
         <Typography sx={{ mb: 2, color: '#ccc' }}>Amounts in SGD.</Typography>
         <Stack direction={{ xs: 'column', sm: 'row' }} gap={2}>
@@ -85,8 +85,8 @@ export default function CompanySettingsPage() {
           <TextField required type="number" label="Max. Budget" value={maximum} onChange={e => setMaximum(e.target.value)} disabled={busy} slotProps={{ htmlInput: { min: 0, step: '0.01' } }} sx={{ '& .MuiOutlinedInput-root': { color: '#e0e0e0', background: 'rgba(255,255,255,0.05)' }, '& .MuiInputLabel-root': { color: '#ccc' }, '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.3)' } }} />
         </Stack>
         <Stack direction="row" gap={2} sx={{ mt: 2 }}>
-          <Button type="submit" variant="contained" disabled={busy}>Save budget</Button>
-          <Button disabled={busy} onClick={() => { setMinimum(company.budget?.minimum ?? ''); setMaximum(company.budget?.maximum ?? ''); setError('') }}>Cancel changes</Button>
+          <Button type="submit" variant="contained" disabled={busy} sx={{ background: '#c4704b', '&:hover': { background: '#a85a3a' } }}>Save budget</Button>
+          <Button disabled={busy} onClick={() => { setMinimum(company.budget?.minimum ?? ''); setMaximum(company.budget?.maximum ?? ''); setError('') }} sx={{ color: '#ccc', border: '1px solid #ccc' }}>Cancel changes</Button>
         </Stack>
       </Paper>
     </Stack>}
