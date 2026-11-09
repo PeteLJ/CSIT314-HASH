@@ -43,11 +43,11 @@ function ModerationPage() {
           <table cellPadding="12" style={{ borderCollapse: 'collapse', width: '100%' }}>
             <thead>
               <tr style={{ background: 'rgba(255,255,255,0.1)' }}>
-                <th style={{ textAlign: 'left' }}>ID</th>
-                <th style={{ textAlign: 'left' }}>Title</th>
-                <th style={{ textAlign: 'left' }}>Style</th>
-                <th style={{ textAlign: 'left' }}>Status</th>
-                <th style={{ textAlign: 'left' }}>Designer</th>
+                <th style={{ textAlign: 'center' }}>ID</th>
+                <th style={{ textAlign: 'center' }}>Title</th>
+                <th style={{ textAlign: 'center' }}>Style</th>
+                <th style={{ textAlign: 'center' }}>Status</th>
+                <th style={{ textAlign: 'center' }}>Designer</th>
                 <th style={{ textAlign: 'center' }}>Action</th>
               </tr>
             </thead>

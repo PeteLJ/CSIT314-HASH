@@ -13,10 +13,16 @@ from categories.models import ProjectCategory
 
 User = get_user_model()
 
-# Categories
-categories = ['Modern', 'Scandinavian', 'Industrial', 'Minimalist', 'Classic', 'Contemporary']
-for name in categories:
+# Categories (from project styles)
+category_names = ['Modern', 'Scandinavian', 'Industrial', 'Minimalist', 'Classic', 'Contemporary']
+for name in category_names:
     ProjectCategory.objects.get_or_create(name=name)
+
+# Property types (for company settings)
+from accounts.models import PropertyType
+property_type_names = ['HDB', 'Condominium', 'Landed', 'Commercial', 'Bungalow']
+for name in property_type_names:
+    PropertyType.objects.get_or_create(name=name)
 
 # Users
 customers = []
@@ -44,8 +50,8 @@ for name in designer_names:
     designers.append(d)
 
 # Projects
-styles = ['Modern', 'Scandinavian', 'Industrial', 'Minimalist', 'Classic', 'Contemporary']
-room_types = ['LIVING_ROOM', 'BEDROOM', 'KITCHEN', 'BATHROOM', 'WHOLE_UNIT']
+styles = list(ProjectCategory.objects.values_list('name', flat=True))
+room_types = [choice[0] for choice in InteriorDesignProject.RoomType.choices]
 statuses = [InteriorDesignProject.Status.DRAFT, InteriorDesignProject.Status.PUBLISHED,
             InteriorDesignProject.Status.PUBLISHED, InteriorDesignProject.Status.PUBLISHED,
             InteriorDesignProject.Status.ARCHIVED]

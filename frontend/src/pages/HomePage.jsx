@@ -1,15 +1,24 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { apiGet } from '../api/client'
 
 function HomePage() {
   const [currentSlide, setCurrentSlide] = useState(0)
   const [isTransitioning, setIsTransitioning] = useState(true)
 
-  const styles = ['Modern', 'Scandinavian', 'Industrial', 'Minimalist', 'Classic', 'Contemporary']
+  const [styles, setStyles] = useState([])
+
+  useEffect(() => {
+    apiGet('/categories/').then(data => {
+      const list = Array.isArray(data) ? data : data.results || []
+      setStyles(list.map(c => c.name))
+    }).catch(() => {})
+  }, [])
+
   const featuredProjects = Array.from({ length: 10 }, (_, i) => ({
     id: i + 1,
     title: `Featured Design ${i + 1}`,
-    style: styles[i % styles.length],
+    style: styles.length > 0 ? styles[i % styles.length] : '',
   }))
 
   const slides = [...featuredProjects, featuredProjects[0]]

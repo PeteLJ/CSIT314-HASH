@@ -13,4 +13,5 @@ urlpatterns = [
     path('project-flags/<int:pk>/moderate/', views.ProjectFlagModerationView.as_view(), name='project-flag-moderate'),
     path('interest-events/', views.InterestEventListView.as_view(), name='interest-event-list'),
     path('interest-events/<int:pk>/', views.InterestEventDetailView.as_view(), name='interest-event-detail'),
+    path('room-types/', views.RoomTypeView.as_view(), name='room-types'),
 ]

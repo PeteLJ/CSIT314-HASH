@@ -2,9 +2,9 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 
-# Custom user model with 4 roles as required by the spec
+# US-03/US-31: User model with 4 roles
 class User(AbstractUser):
-    """Custom user model with 4 roles as required by the Project Specification."""
+    """Custom user model with 4 roles."""
 
     class Role(models.TextChoices):
         CUSTOMER = 'CUSTOMER', 'Customer'
@@ -23,6 +23,8 @@ class User(AbstractUser):
     def __str__(self):
         return f'{self.username} ({self.get_role_display()})'
 
+
+# US-12: Manage Supported Property Types
 class PropertyType(models.Model):
     name = models.CharField(max_length=100, unique=True)
 
@@ -30,6 +32,7 @@ class PropertyType(models.Model):
         return self.name
 
 
+# US-12 / US-15: Company settings
 class Company(models.Model):
     designer = models.OneToOneField(User, on_delete=models.CASCADE, related_name='company_settings')
     name = models.CharField(max_length=200)

@@ -14,8 +14,13 @@ class ProjectCategorySerializer(serializers.ModelSerializer):
             'description',
             'project_count',
             'created_at',
+            'updated_at',
         )
-        read_only_fields = ('project_count', 'created_at')
+        read_only_fields = (
+            'project_count',
+            'created_at',
+            'updated_at',
+        )
 
     def get_project_count(self, obj):
         return obj.projects.count()

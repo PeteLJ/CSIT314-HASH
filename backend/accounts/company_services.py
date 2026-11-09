@@ -1,4 +1,4 @@
-"""M2 controls and repositories. Company identity always comes from request.user."""
+"""Company controls and repositories. Company identity always comes from request.user."""
 from django.db import transaction
 from rest_framework import serializers
 from rest_framework.exceptions import NotFound

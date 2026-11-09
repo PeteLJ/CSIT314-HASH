@@ -85,4 +85,4 @@ STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Fixed, opt-in local demo identity. Never enabled outside DEBUG.
-M2_DEMO_DESIGNER_ID = os.getenv('M2_DEMO_DESIGNER_ID')
+DEMO_DESIGNER_ID = os.getenv('DEMO_DESIGNER_ID')

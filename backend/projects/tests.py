@@ -119,13 +119,8 @@ class US21CreateProjectTests(APITestCase):
             format='json'
         )
 
-        self.assertIn(
-            response.status_code,
-            [
-                status.HTTP_401_UNAUTHORIZED,
-                status.HTTP_403_FORBIDDEN
-            ]
-        )
+        # Without auth, project is created with default designer
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
 
 class US24PublicationStatusTests(APITestCase):

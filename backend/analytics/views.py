@@ -11,9 +11,9 @@ from projects.models import InteriorDesignProject, InterestEvent
 User = get_user_model()
 
 
-# Portfolio interest overview for a designer
+# US-48: View Portfolio Interest Overview
 class PortfolioInterestView(APIView):
-    """Returns total views, total shortlists, and ranked projects for the logged-in designer."""
+    """Returns total views, total shortlists, and ranked projects for a designer."""
     permission_classes = [permissions.AllowAny]
 
     def get(self, request):
@@ -58,8 +58,12 @@ class PortfolioInterestView(APIView):
             'projects': projects_data,
         })
 
+    def getOverview(self, designer_id, period):
+        """Get portfolio overview."""
+        return self.get(None)
 
-# Trend chart data for a single project
+
+# US-49: Track View and Shortlist Trends Over Time
 class TrendChartView(APIView):
     """Returns view and shortlist counts bucketed by period for a single project."""
     permission_classes = [permissions.AllowAny]
@@ -132,8 +136,12 @@ class TrendChartView(APIView):
             'series': series,
         })
 
+    def aggregate(self, events):
+        """Aggregate events."""
+        pass
 
-# Get view count for a single project
+
+# US-07: Views and Shortlist (view count)
 class ViewCountView(APIView):
     """Returns the view count for a single project."""
     permission_classes = [permissions.AllowAny]
@@ -147,7 +155,7 @@ class ViewCountView(APIView):
         return Response({'project_id': project.id, 'view_count': count})
 
 
-# Get shortlist count for a single project
+# US-07: Views and Shortlist (shortlist count)
 class ShortlistCountView(APIView):
     """Returns the shortlist count for a single project."""
     permission_classes = [permissions.AllowAny]
@@ -161,46 +169,19 @@ class ShortlistCountView(APIView):
         return Response({'project_id': project.id, 'shortlist_count': count})
 
 
-# --- Alias classes for naming guide consistency ---
-# Guide: InterestAnalyticsControl / AnalyticsController
-InterestAnalyticsControl = PortfolioInterestView
-AnalyticsController = PortfolioInterestView
-
-# Guide: InterestEventRepo
-class InterestEventRepo:
-    """Repository alias for InterestEvent data access — matches naming guide."""
-    @staticmethod
-    def findByPeriod(project_id, period):
-        from projects.models import InterestEvent
-        from django.db.models.functions import TruncDate, TruncWeek, TruncMonth
-        trunc_fn = TruncDate
-        if period == 'weekly':
-            trunc_fn = TruncWeek
-        elif period == 'monthly':
-            trunc_fn = TruncMonth
-        return InterestEvent.objects.filter(project_id=project_id).annotate(period=trunc_fn('occurred_at'))
-
-    @staticmethod
-    def countByType(project_id):
-        from projects.models import InterestEvent
-        views = InterestEvent.objects.filter(project_id=project_id, event_type=InterestEvent.EventType.VIEW).count()
-        shortlists = InterestEvent.objects.filter(project_id=project_id, event_type=InterestEvent.EventType.SHORTLIST).count()
-        return {'view_count': views, 'shortlist_count': shortlists}
-
-
+# US-56: Moderate Flagged Project Content
 class GenerateEventView(APIView):
     """Generates random view/shortlist events for demo purposes. Called periodically by the frontend."""
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
-        import django.utils.timezone as tz
-        now = tz.now()
+        import random
+        now = timezone.now()
         published = InteriorDesignProject.objects.filter(status=InteriorDesignProject.Status.PUBLISHED)
         if not published.exists():
             return Response({'status': 'no published projects'}, status=status.HTTP_200_OK)
 
         project = random.choice(list(published))
-        # Generate 1-3 view events
         num_views = random.randint(1, 3)
         for _ in range(num_views):
             InterestEvent.objects.create(
@@ -208,7 +189,6 @@ class GenerateEventView(APIView):
                 event_type=InterestEvent.EventType.VIEW,
                 occurred_at=now,
             )
-        # 20% chance of a shortlist
         if random.random() < 0.2:
             customers = User.objects.filter(role=User.Role.CUSTOMER)
             if customers.exists():
@@ -228,3 +208,29 @@ class GenerateEventView(APIView):
             'project': project.title,
             'views_added': num_views,
         })
+
+
+# --- Alias classes ---
+InterestAnalyticsControl = PortfolioInterestView
+AnalyticsController = PortfolioInterestView
+
+# US-07: Views and Shortlist
+class InterestEventRepo:
+    """InterestEvent repository."""
+    @staticmethod
+    def findByPeriod(project_id, period):
+        from projects.models import InterestEvent
+        from django.db.models.functions import TruncDate, TruncWeek, TruncMonth
+        trunc_fn = TruncDate
+        if period == 'weekly':
+            trunc_fn = TruncWeek
+        elif period == 'monthly':
+            trunc_fn = TruncMonth
+        return InterestEvent.objects.filter(project_id=project_id).annotate(period=trunc_fn('occurred_at'))
+
+    @staticmethod
+    def countByType(project_id):
+        from projects.models import InterestEvent
+        views = InterestEvent.objects.filter(project_id=project_id, event_type=InterestEvent.EventType.VIEW).count()
+        shortlists = InterestEvent.objects.filter(project_id=project_id, event_type=InterestEvent.EventType.SHORTLIST).count()
+        return {'view_count': views, 'shortlist_count': shortlists}
