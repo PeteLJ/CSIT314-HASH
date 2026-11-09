@@ -39,8 +39,7 @@ class ProjectValidator:
         errors = []
         if not project.title.strip():
             errors.append('Project title is required.')
-        if not project.description.strip():
-            errors.append('Project description is required.')
+        # US-21: Description is optional
         if not project.style.strip():
             errors.append('Design style is required.')
         if not project.room_type:
@@ -171,6 +170,16 @@ class ProjectController(generics.ListCreateAPIView):
         if errors:
             from rest_framework.exceptions import ValidationError
             raise ValidationError({'errors': errors})
+
+        # Auto-assign category from style if not provided
+        category = serializer.validated_data.get('category')
+        if not category:
+            style_name = serializer.validated_data.get('style', '')
+            if style_name:
+                from categories.models import ProjectCategory
+                category = ProjectCategory.objects.filter(name__iexact=style_name).first()
+                if category:
+                    serializer.validated_data['category'] = category
 
         serializer.save(
             designer=designer,

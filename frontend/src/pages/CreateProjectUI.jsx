@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { apiGet, apiPost } from '../api/client'
 
 // US-21: Create Interior Design Project
-function CreatePage() {
+function CreateProjectUI() {
   const [roomTypes, setRoomTypes] = useState([])
 
   useEffect(() => {
@@ -72,12 +72,23 @@ function CreatePage() {
       return 'Project title is required.'
     }
 
+    if (!form.style) {
+      return 'Style is required.'
+    }
+
+    if (!form.room_type) {
+      return 'Room type is required.'
+    }
+
     const cost = form.cost === ''
       ? null
       : Number(form.cost)
 
+    if (cost === null) {
+      return 'Cost is required.'
+    }
+
     if (
-      cost !== null &&
       (!Number.isFinite(cost) || cost < 0)
     ) {
       return 'Cost must be a valid non-negative number.'
@@ -193,6 +204,7 @@ function CreatePage() {
             value={form.description}
             onChange={handleChange}
             rows={4}
+            placeholder="(optional)"
             style={{ width: '100%', padding: '0.5rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.3)', background: 'rgba(255,255,255,0.05)', color: '#e0e0e0' }}
           />
         </div>
@@ -294,4 +306,4 @@ function CreatePage() {
   )
 }
 
-export default CreatePage
+export default CreateProjectUI
