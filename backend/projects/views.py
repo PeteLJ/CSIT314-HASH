@@ -39,7 +39,8 @@ class ProjectValidator:
         errors = []
         if not project.title.strip():
             errors.append('Project title is required.')
-        # US-21: Description is optional
+        if not project.description.strip():
+            errors.append('Project description is required.')
         if not project.style.strip():
             errors.append('Design style is required.')
         if not project.room_type:
