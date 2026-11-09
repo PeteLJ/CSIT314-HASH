@@ -1,6 +1,6 @@
 from rest_framework import generics, permissions, status
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
-from rest_framework.views import APIView
 from .models import ProjectCategory
 from .serializers import ProjectCategorySerializer
 
@@ -14,7 +14,6 @@ class ProjectCategoryListView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         name = self.request.data.get('name', '')
         if not ProjectCategory.validateCategoryName(name):
-            from rest_framework.exceptions import ValidationError
             raise ValidationError({'name': 'Invalid category name.'})
         serializer.save()
 
@@ -37,12 +36,31 @@ class ProjectCategoryListView(generics.ListCreateAPIView):
         return ProjectCategory.validateCategoryName(name)
 
 
-# US-51: Manage Interior Design Project Categories (delete)
-class ProjectCategoryDetailView(generics.DestroyAPIView):
+# US-51: Manage Interior Design Project Categories
+class ProjectCategoryDetailView(
+    generics.RetrieveUpdateDestroyAPIView
+):
     queryset = ProjectCategory.objects.all()
     serializer_class = ProjectCategorySerializer
     permission_classes = [permissions.AllowAny]
 
+    def destroy(self, request, *args, **kwargs):
+        category = self.get_object()
+        project_count = category.projects.count()
+
+        if project_count:
+            return Response(
+                {
+                    'error': (
+                        'This category is assigned to existing projects. '
+                        'Reassign those projects before deleting it.'
+                    ),
+                    'project_count': project_count,
+                },
+                status=status.HTTP_409_CONFLICT,
+            )
+
+        return super().destroy(request, *args, **kwargs)
 
 # US-51: Manage Interior Design Project Categories (rename/update)
 class ProjectCategoryUpdateView(generics.UpdateAPIView):
@@ -54,10 +72,8 @@ class ProjectCategoryUpdateView(generics.UpdateAPIView):
     def perform_update(self, serializer):
         name = self.request.data.get('name', serializer.instance.name)
         if not ProjectCategory.validateCategoryName(name):
-            from rest_framework.exceptions import ValidationError
             raise ValidationError({'name': 'Invalid category name.'})
-        instance = serializer.save()
-        instance.rename(name)
+        serializer.save(name=name.strip())
 
 
 # --- Alias classes ---

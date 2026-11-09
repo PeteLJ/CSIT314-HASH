@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import InteriorDesignProject, InterestEvent
+from .models import InteriorDesignProject, InterestEvent, ProjectFlag
 
 
 class InteriorDesignProjectSerializer(serializers.ModelSerializer):
@@ -70,6 +70,88 @@ class InteriorDesignProjectSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(errors)
 
         return attrs
+
+
+class ProjectFlagSerializer(serializers.ModelSerializer):
+    project_title = serializers.CharField(
+        source='project.title',
+        read_only=True,
+    )
+    project_status = serializers.CharField(
+        source='project.status',
+        read_only=True,
+    )
+    designer_name = serializers.CharField(
+        source='project.designer.username',
+        read_only=True,
+    )
+    reporter_name = serializers.SerializerMethodField()
+    reviewed_by_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ProjectFlag
+        fields = (
+            'id',
+            'project',
+            'project_title',
+            'project_status',
+            'designer_name',
+            'reporter_name',
+            'reason',
+            'details',
+            'status',
+            'moderation_note',
+            'reviewed_by_name',
+            'created_at',
+            'resolved_at',
+        )
+        read_only_fields = fields
+
+    def get_reporter_name(self, obj):
+        return obj.reporter.username if obj.reporter else 'Anonymous'
+
+    def get_reviewed_by_name(self, obj):
+        return obj.reviewed_by.username if obj.reviewed_by else None
+
+
+class ProjectFlagCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProjectFlag
+        fields = (
+            'id',
+            'project',
+            'reason',
+            'details',
+            'status',
+            'created_at',
+        )
+        read_only_fields = ('id', 'status', 'created_at')
+
+    def validate_project(self, project):
+        if project.status != InteriorDesignProject.Status.PUBLISHED:
+            raise serializers.ValidationError(
+                'Only published projects can be flagged.'
+            )
+        return project
+
+    def validate(self, attrs):
+        if (
+            attrs.get('reason') == ProjectFlag.Reason.OTHER
+            and not attrs.get('details', '').strip()
+        ):
+            raise serializers.ValidationError({
+                'details': 'Please describe the reason for this report.'
+            })
+        return attrs
+
+
+class ProjectFlagModerationSerializer(serializers.Serializer):
+    action = serializers.ChoiceField(choices=('REMOVE', 'DISMISS'))
+    moderation_note = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        max_length=1000,
+    )
 
 
 # --- DTOs (Data Transfer Objects) ---

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import InteriorDesignProject, InterestEvent
+from .models import InteriorDesignProject, InterestEvent, ProjectFlag
 
 
 @admin.register(InteriorDesignProject)
@@ -13,3 +13,17 @@ class InteriorDesignProjectAdmin(admin.ModelAdmin):
 class InterestEventAdmin(admin.ModelAdmin):
     list_display = ('project', 'event_type', 'customer', 'occurred_at')
     list_filter = ('event_type', 'occurred_at')
+
+
+@admin.register(ProjectFlag)
+class ProjectFlagAdmin(admin.ModelAdmin):
+    list_display = (
+        'project',
+        'reason',
+        'status',
+        'reporter',
+        'created_at',
+        'reviewed_by',
+    )
+    list_filter = ('status', 'reason', 'created_at')
+    search_fields = ('project__title', 'details', 'moderation_note')

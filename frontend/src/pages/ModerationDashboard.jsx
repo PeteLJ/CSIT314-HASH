@@ -1,94 +1,165 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { apiGet, apiPatch } from '../api/client'
 
-// Review and flag inappropriate project content
+const reasonLabels = {
+  INAPPROPRIATE: 'Inappropriate content',
+  MISLEADING: 'Misleading information',
+  COPYRIGHT: 'Copyright concern',
+  OTHER: 'Other',
+}
+
 function ModerationDashboard() {
-  const [projects, setProjects] = useState([])
+  const [flags, setFlags] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [notice, setNotice] = useState('')
+  const [processingId, setProcessingId] = useState(null)
 
-  const loadProjects = () => {
-    apiGet('/projects/').then(data => {
-      const list = Array.isArray(data) ? data : data.results || []
-      setProjects(list.sort((a, b) => a.id - b.id))
-      setLoading(false)
-    }).catch(() => setLoading(false))
-  }
-
-  useEffect(() => { loadProjects() }, [])
-
-  const handleFlag = async (id) => {
+  const loadFlags = async () => {
     try {
-      await apiPatch(`/projects/${id}/`, { status: 'ARCHIVED' })
-      loadProjects()
+      const data = await apiGet('/project-flags/?status=OPEN')
+      setFlags(Array.isArray(data) ? data : data.results || [])
+      setError('')
     } catch (err) {
-      alert('Failed to flag project')
+      setError(err.message)
+    } finally {
+      setLoading(false)
     }
   }
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'PUBLISHED': return '#4caf50'
-      case 'DRAFT': return '#ff9800'
-      case 'ARCHIVED': return '#f44336'
-      default: return '#ccc'
+  useEffect(() => {
+    loadFlags()
+  }, [])
+
+  const handleDecision = async (flag, action) => {
+    const removing = action === 'REMOVE'
+    const confirmed = window.confirm(
+      removing
+        ? `Remove “${flag.project_title}” from the platform?`
+        : `Keep “${flag.project_title}” and dismiss this report?`,
+    )
+
+    if (!confirmed) return
+
+    const moderationNote = window.prompt(
+      'Optional moderation note:',
+      removing ? 'Confirmed policy violation.' : 'No policy violation found.',
+    )
+
+    if (moderationNote === null) return
+
+    setProcessingId(flag.id)
+    setError('')
+    setNotice('')
+
+    try {
+      await apiPatch(`/project-flags/${flag.id}/moderate/`, {
+        action,
+        moderation_note: moderationNote,
+      })
+      setNotice(
+        removing
+          ? 'Project removed and report resolved.'
+          : 'Report dismissed and project kept.',
+      )
+      await loadFlags()
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setProcessingId(null)
     }
   }
 
   return (
-    <div style={{ maxWidth: '900px', margin: '0 auto', padding: '0 2rem' }}>
-      <h1>Moderate Flagged Project Content</h1>
-      <p>Review and remove projects that customers have flagged.</p>
-      {loading ? <p>Loading...</p> : projects.length === 0 ? (
-        <p>No projects found.</p>
+    <div style={{ maxWidth: '1050px', margin: '0 auto', padding: '0 2rem 3rem' }}>
+      <h1>Flagged Project Moderation</h1>
+      <p style={{ marginBottom: '1.25rem' }}>
+        Review customer reports, remove inappropriate projects or dismiss reports that do not violate platform rules.
+      </p>
+
+      {error && (
+        <p role="alert" style={{ color: '#ff8a80', marginBottom: '1rem' }}>
+          {error}
+        </p>
+      )}
+      {notice && (
+        <p role="status" style={{ color: '#9be7a1', marginBottom: '1rem' }}>
+          {notice}
+        </p>
+      )}
+
+      {loading ? <p>Loading moderation queue...</p> : flags.length === 0 ? (
+        <div style={{ padding: '2rem', background: 'rgba(255,255,255,0.05)', borderRadius: '10px' }}>
+          <h2>No open reports</h2>
+          <p>The moderation queue is currently clear.</p>
+        </div>
       ) : (
-        <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '8px', overflow: 'hidden' }}>
-          <table cellPadding="12" style={{ borderCollapse: 'collapse', width: '100%' }}>
-            <thead>
-              <tr style={{ background: 'rgba(255,255,255,0.1)' }}>
-                <th style={{ textAlign: 'center' }}>ID</th>
-                <th style={{ textAlign: 'center' }}>Title</th>
-                <th style={{ textAlign: 'center' }}>Style</th>
-                <th style={{ textAlign: 'center' }}>Status</th>
-                <th style={{ textAlign: 'center' }}>Designer</th>
-                <th style={{ textAlign: 'center' }}>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {projects.map(p => (
-                <tr key={p.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                  <td>{p.id}</td>
-                  <td>{p.title}</td>
-                  <td>{p.style}</td>
-                  <td>
-                    <span style={{
-                      padding: '0.25rem 0.5rem',
-                      borderRadius: '4px',
-                      background: getStatusColor(p.status),
-                      color: 'white',
-                      fontSize: '0.8rem',
-                    }}>
-                      {p.status}
-                    </span>
-                  </td>
-                  <td>{p.designer_name}</td>
-                  <td style={{ textAlign: 'center' }}>
-                    {p.status !== 'ARCHIVED' && (
-                      <button onClick={() => handleFlag(p.id)} style={{
-                        color: '#ff6b6b',
-                        background: 'rgba(255,107,107,0.1)',
-                        border: '1px solid #ff6b6b',
-                        borderRadius: '4px',
-                        padding: '0.25rem 0.75rem',
-                        cursor: 'pointer',
-                      }}>
-                        Flag & Archive
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div style={{ display: 'grid', gap: '1rem' }}>
+          {flags.map((flag) => (
+            <article
+              key={flag.id}
+              style={{
+                padding: '1.25rem',
+                border: '1px solid rgba(255,255,255,0.16)',
+                borderRadius: '10px',
+                background: 'rgba(255,255,255,0.05)',
+                textAlign: 'left',
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+                <div>
+                  <h2 style={{ marginBottom: '0.35rem' }}>{flag.project_title}</h2>
+                  <p>Designer: {flag.designer_name}</p>
+                  <p>Project status: {flag.project_status}</p>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <strong>{reasonLabels[flag.reason] || flag.reason}</strong>
+                  <p>Reported by {flag.reporter_name}</p>
+                  <p>{new Date(flag.created_at).toLocaleString()}</p>
+                </div>
+              </div>
+
+              <div style={{ margin: '1rem 0', padding: '0.8rem', background: 'rgba(0,0,0,0.18)', borderRadius: '8px' }}>
+                <strong>Customer evidence / details</strong>
+                <p style={{ marginTop: '0.35rem' }}>
+                  {flag.details || 'No additional details were provided.'}
+                </p>
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.6rem', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  disabled={processingId === flag.id}
+                  onClick={() => handleDecision(flag, 'DISMISS')}
+                  style={{
+                    padding: '0.55rem 0.9rem',
+                    borderRadius: '6px',
+                    border: '1px solid #90caf9',
+                    background: 'transparent',
+                    color: '#90caf9',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Keep project
+                </button>
+                <button
+                  type="button"
+                  disabled={processingId === flag.id}
+                  onClick={() => handleDecision(flag, 'REMOVE')}
+                  style={{
+                    padding: '0.55rem 0.9rem',
+                    borderRadius: '6px',
+                    border: 0,
+                    background: '#c62828',
+                    color: '#fff',
+                    cursor: 'pointer',
+                  }}
+                >
+                  {processingId === flag.id ? 'Processing...' : 'Remove project'}
+                </button>
+              </div>
+            </article>
+          ))}
         </div>
       )}
     </div>

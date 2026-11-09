@@ -3,38 +3,57 @@ const API_BASE = window.location.hostname === 'localhost'
   ? 'http://127.0.0.1:8000/api'
   : 'https://petelj.pythonanywhere.com/api'
 
-// Helper to GET data from the backend API
-export async function apiGet(endpoint) {
-  const res = await fetch(`${API_BASE}${endpoint}`)
-  if (!res.ok) throw new Error(`GET ${endpoint} failed: ${res.status}`)
-  return res.json()
+function getErrorMessage(payload, fallback) {
+  if (!payload) return fallback
+  if (typeof payload === 'string') return payload
+  if (payload.error) return payload.error
+  if (payload.detail) return payload.detail
+
+  const firstError = Object.values(payload).flat().find(Boolean)
+  return firstError ? String(firstError) : fallback
 }
 
-// Helper to POST data to the backend API
-export async function apiPost(endpoint, data) {
+async function request(endpoint, options = {}) {
   const res = await fetch(`${API_BASE}${endpoint}`, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...options.headers,
+    },
+  })
+
+  const payload = res.status === 204
+    ? null
+    : await res.json().catch(() => null)
+
+  if (!res.ok) {
+    throw new Error(getErrorMessage(
+      payload,
+      `${options.method || 'GET'} ${endpoint} failed: ${res.status}`,
+    ))
+  }
+
+  return payload
+}
+
+export function apiGet(endpoint) {
+  return request(endpoint)
+}
+
+export function apiPost(endpoint, data) {
+  return request(endpoint, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   })
-  if (!res.ok) throw new Error(`POST ${endpoint} failed: ${res.status}`)
-  return res.json()
 }
 
-// Helper to PATCH data to the backend API
-export async function apiPatch(endpoint, data) {
-  const res = await fetch(`${API_BASE}${endpoint}`, {
+export function apiPatch(endpoint, data) {
+  return request(endpoint, {
     method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   })
-  if (!res.ok) throw new Error(`PATCH ${endpoint} failed: ${res.status}`)
-  return res.json()
 }
 
-// Helper to DELETE data from the backend API
-export async function apiDelete(endpoint) {
-  const res = await fetch(`${API_BASE}${endpoint}`, { method: 'DELETE' })
-  if (!res.ok) throw new Error(`DELETE ${endpoint} failed: ${res.status}`)
-  return res.status === 204 ? null : res.json()
+export function apiDelete(endpoint) {
+  return request(endpoint, { method: 'DELETE' })
 }
