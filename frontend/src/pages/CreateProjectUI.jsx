@@ -72,23 +72,12 @@ function CreateProjectUI() {
       return 'Project title is required.'
     }
 
-    if (!form.style) {
-      return 'Style is required.'
-    }
-
-    if (!form.room_type) {
-      return 'Room type is required.'
-    }
-
     const cost = form.cost === ''
       ? null
       : Number(form.cost)
 
-    if (cost === null) {
-      return 'Cost is required.'
-    }
-
     if (
+      cost !== null &&
       (!Number.isFinite(cost) || cost < 0)
     ) {
       return 'Cost must be a valid non-negative number.'

@@ -69,7 +69,6 @@ for i in range(100):
     lo, hi = cost_ranges[room_type]
     cost = random.randint(lo, hi)
     style = random.choice(styles)
-    category = ProjectCategory.objects.filter(name=style).first()
     p = InteriorDesignProject.objects.create(
         designer=random.choice(designers),
         title=f'Interior Design {i}',
@@ -79,7 +78,6 @@ for i in range(100):
         budget_min=cost,
         budget_max=cost + random.randint(0, 5000),
         status=random.choice(statuses),
-        category=category,
     )
     projects.append(p)
 
