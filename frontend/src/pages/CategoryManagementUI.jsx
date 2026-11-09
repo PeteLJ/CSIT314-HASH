@@ -10,9 +10,10 @@ const inputStyle = {
 }
 
 const buttonStyle = {
-  padding: '0.45rem 0.8rem',
-  borderRadius: '6px',
+  padding: '0.2rem 0.5rem',
+  borderRadius: '4px',
   cursor: 'pointer',
+  fontSize: '0.8rem',
 }
 
 function CategoryManagementUI() {
