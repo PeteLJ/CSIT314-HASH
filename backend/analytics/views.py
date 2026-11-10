@@ -1,4 +1,4 @@
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.utils import timezone
 from datetime import timedelta, date
 from django.db.models.functions import TruncDate, TruncWeek, TruncMonth
@@ -13,15 +13,23 @@ User = get_user_model()
 
 # US-48: View Portfolio Interest Overview
 class PortfolioInterestView(APIView):
-    """Returns total views, total shortlists, and ranked projects for a designer."""
+    """Return a designer's projects and interest within a rolling reporting period."""
     permission_classes = [permissions.AllowAny]
+    REPORTING_PERIODS = {'all': None, '7d': 7, '30d': 30, '90d': 90}
 
     def get(self, request):
+        period = request.query_params.get('period', 'all')
+        if period not in self.REPORTING_PERIODS:
+            return Response(
+                {'error': 'Invalid reporting period. Choose all, 7d, 30d, or 90d.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         designer_id = request.query_params.get('designer_id')
         if designer_id:
             try:
-                designer = User.objects.get(pk=designer_id)
-            except User.DoesNotExist:
+                designer = User.objects.get(pk=designer_id, role=User.Role.INTERIOR_DESIGNER)
+            except (User.DoesNotExist, ValueError, OverflowError):
                 return Response({'error': 'Designer not found'}, status=status.HTTP_404_NOT_FOUND)
         elif request.user.is_authenticated:
             designer = request.user
@@ -30,14 +38,27 @@ class PortfolioInterestView(APIView):
         if not designer:
             return Response({'error': 'No designer found'}, status=status.HTTP_404_NOT_FOUND)
 
-        projects = InteriorDesignProject.objects.filter(designer=designer)
+        period_end = timezone.now()
+        days = self.REPORTING_PERIODS[period]
+        period_start = period_end - timedelta(days=days) if days is not None else None
+        event_filter = Q(interest_events__occurred_at__lte=period_end)
+        if period_start is not None:
+            event_filter &= Q(interest_events__occurred_at__gte=period_start)
+
+        # Filter the counts, not the projects: inactive projects must remain visible.
+        projects = InteriorDesignProject.objects.filter(designer=designer).annotate(
+            view_count=Count('interest_events', filter=event_filter & Q(
+                interest_events__event_type=InterestEvent.EventType.VIEW)),
+            shortlist_count=Count('interest_events', filter=event_filter & Q(
+                interest_events__event_type=InterestEvent.EventType.SHORTLIST)),
+        ).order_by('-shortlist_count', '-view_count', 'id')
         projects_data = []
         total_views = 0
         total_shortlists = 0
 
         for project in projects:
-            vc = InterestEvent.objects.filter(project=project, event_type=InterestEvent.EventType.VIEW).count()
-            sc = InterestEvent.objects.filter(project=project, event_type=InterestEvent.EventType.SHORTLIST).count()
+            vc = project.view_count
+            sc = project.shortlist_count
             total_views += vc
             total_shortlists += sc
             projects_data.append({
@@ -49,9 +70,11 @@ class PortfolioInterestView(APIView):
                 'shortlist_count': sc,
             })
 
-        projects_data.sort(key=lambda x: (-x['shortlist_count'], -x['view_count']))
-
         return Response({
+            'designer_id': designer.id,
+            'period': period,
+            'period_start': period_start.isoformat() if period_start is not None else None,
+            'period_end': period_end.isoformat(),
             'total_views': total_views,
             'total_shortlists': total_shortlists,
             'project_count': len(projects_data),
