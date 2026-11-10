@@ -37,8 +37,6 @@ npm install
 npm run dev
 ```
 
-The frontend runs in Github Pages, at https://petelj.github.io/CSIT314-HASH/.
-
 ## Project Structure
 
 ```
