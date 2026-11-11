@@ -6,6 +6,8 @@ import { FEATURES } from '../config/features'
 function BrowsePage() {
   const [projects, setProjects] = useState([])
   const [loading, setLoading] = useState(true)
+  const [loadFailed, setLoadFailed] = useState(false)
+  const [retryCount, setRetryCount] = useState(0)
   const [searchParams] = useSearchParams()
   const [searchQuery, setSearchQuery] = useState('')
   const [styleFilter, setStyleFilter] = useState(searchParams.get('style') || '')
@@ -31,6 +33,10 @@ function BrowsePage() {
   }, [])
 
   useEffect(() => {
+    let cancelled = false
+    setLoading(true)
+    setLoadFailed(false)
+
     let url = '/projects/'
     const params = []
     if (searchQuery) params.push(`search=${encodeURIComponent(searchQuery)}`)
@@ -58,18 +64,25 @@ function BrowsePage() {
     }
     if (params.length) url += '?' + params.join('&')
     apiGet(url).then(data => {
-      if (data.results) {
+      if (cancelled) return
+      if (Array.isArray(data?.results)) {
         setProjects([...data.results].sort((a, b) => a.id - b.id))
         setTotal(data.total || data.results.length)
         setTotalPages(data.total_pages || 1)
-      } else {
-        setProjects((Array.isArray(data) ? data : []).sort((a, b) => a.id - b.id))
-        setTotal(Array.isArray(data) ? data.length : 0)
+      } else if (Array.isArray(data)) {
+        setProjects([...data].sort((a, b) => a.id - b.id))
+        setTotal(data.length)
         setTotalPages(1)
+      } else {
+        throw new Error('Invalid project search response')
       }
-      setLoading(false)
-    }).catch(() => setLoading(false))
-  }, [searchQuery, styleFilter, roomTypeFilter, budgetFilter, categoryFilter, propertyTypeFilter, myBudgetFilter, sortFilter, page])
+    }).catch(() => {
+      if (!cancelled) setLoadFailed(true)
+    }).finally(() => {
+      if (!cancelled) setLoading(false)
+    })
+    return () => { cancelled = true }
+  }, [searchQuery, styleFilter, roomTypeFilter, budgetFilter, categoryFilter, propertyTypeFilter, myBudgetFilter, sortFilter, page, retryCount])
 
   const styles = categories.map(c => c.name)
   const [roomTypes, setRoomTypes] = useState([])
@@ -137,8 +150,13 @@ function BrowsePage() {
           )}
         </div>
       )}
-      {loading ? <p>Loading...</p> : projects.length === 0 ? (
-        <p>No projects found. Make sure the backend is running.</p>
+      {loading ? <p role="status">Loading projects...</p> : loadFailed ? (
+        <div>
+          <p role="alert">Could not load projects. Please try again.</p>
+          <button type="button" onClick={() => setRetryCount(count => count + 1)}>Retry</button>
+        </div>
+      ) : projects.length === 0 ? (
+        <p role="status">No projects match your search.</p>
       ) : (
         <>
           <div className='card-grid'>
