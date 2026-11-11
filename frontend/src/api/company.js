@@ -1,12 +1,12 @@
 // API base URL - uses localhost in development, PythonAnywhere in production
-const API_BASE = window.location.hostname === 'localhost'
+const API_BASE = ['localhost', '127.0.0.1'].includes(window.location.hostname)
   ? 'http://127.0.0.1:8000/api'
   : 'https://petelj.pythonanywhere.com/api'
 
 export async function companyRequest(path, method = 'GET', data, designerId) {
   const id = designerId || localStorage.getItem('designer_id') || ''
   const separator = path.includes('?') ? '&' : '?'
-  const url = id ? `${API_BASE}${path}${separator}designer_id=${id}` : `${API_BASE}${path}`
+  const url = id ? `${API_BASE}${path}${separator}designer_id=${encodeURIComponent(id)}` : `${API_BASE}${path}`
   const response = await fetch(url, {
     method,
     headers: { 'Content-Type': 'application/json' },

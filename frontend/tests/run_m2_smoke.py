@@ -18,8 +18,10 @@ with tempfile.TemporaryDirectory(prefix='m2-smoke-') as directory:
     env = dict(os.environ, DJANGO_SETTINGS_MODULE='m2_smoke_settings', DEBUG='True',
                PYTHONPATH=os.pathsep.join([directory, str(ROOT / 'backend')]))
     subprocess.run([sys.executable, 'manage.py', 'migrate', '--noinput'], cwd=ROOT / 'backend', env=env, check=True, stdout=subprocess.DEVNULL)
-    seed = subprocess.check_output([sys.executable, 'manage.py', 'seed_m2_demo'], cwd=ROOT / 'backend', env=env, text=True)
-    env['M2_DEMO_DESIGNER_ID'] = re.search(r'M2_DEMO_DESIGNER_ID=(\d+)', seed).group(1)
+    seed = subprocess.check_output([sys.executable, 'manage.py', 'seed_demo'], cwd=ROOT / 'backend', env=env, text=True)
+    env['M2_DEMO_DESIGNER_ID'] = re.search(r'DEMO_DESIGNER_ID=(\d+)', seed).group(1)
+    subprocess.run([sys.executable, 'manage.py', 'shell', '-c',
+        "from accounts.models import User, Company; u=User.objects.create_user(username='second_designer', role=User.Role.INTERIOR_DESIGNER); Company.objects.create(designer=u, name='Second Studio')"], cwd=ROOT / 'backend', env=env, check=True, stdout=subprocess.DEVNULL)
     with socket.socket() as sock:
         sock.bind(('127.0.0.1', 0))
         port = sock.getsockname()[1]

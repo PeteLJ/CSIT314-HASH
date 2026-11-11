@@ -121,3 +121,50 @@ def test_provision_existing_designers_preserves_data(setup):
     company.refresh_from_db()
     assert company.name == 'Studio A'
     assert not Company.objects.filter(designer=customer).exists()
+
+
+def test_selected_designer_receives_budget_and_property_changes(setup):
+    client, first, second = setup
+    query = f'?designer_id={second.designer_id}'
+    kind = PropertyType.objects.create(name='HDB')
+    assert client.patch('/api/company/budget-range/' + query, {'minimum': '10', 'maximum': '20'}, format='json').status_code == 200
+    assert client.post('/api/company/property-types/' + query, {'type_id': kind.pk}, format='json').status_code == 201
+    assert client.get('/api/company/settings/' + query).data['id'] == second.pk
+    first.refresh_from_db(); second.refresh_from_db()
+    assert first.budget_minimum is None
+    assert not first.supported_property_types.exists()
+    assert second.budget_minimum == 10
+    assert second.supported_property_types.filter(pk=kind.pk).exists()
+    assert client.delete(f'/api/company/property-types/{kind.pk}/' + query).status_code == 204
+
+
+@pytest.mark.parametrize('designer_id,status', [('abc',400), ('0',400), ('-1',400), ('',400), ('9999999999999999999999999',400), ('999999',404)])
+def test_invalid_selection_never_falls_back(setup, designer_id, status):
+    client, first, _ = setup
+    kind = PropertyType.objects.create(name='HDB')
+    first.supported_property_types.add(kind)
+    query = f'?designer_id={designer_id}'
+    assert client.get('/api/company/settings/' + query).status_code == status
+    assert client.patch('/api/company/budget-range/' + query, {'minimum':'1','maximum':'2'}, format='json').status_code == status
+    assert client.post('/api/company/property-types/' + query, {'type_id':kind.pk}, format='json').status_code == status
+    assert client.delete(f'/api/company/property-types/{kind.pk}/' + query).status_code == status
+    first.refresh_from_db()
+    assert first.budget_minimum is None
+    assert first.supported_property_types.filter(pk=kind.pk).exists()
+
+
+def test_customer_cannot_be_selected_as_designer(setup):
+    client, _, _ = setup
+    customer = User.objects.create_user(username='customer_selection')
+    assert client.get(f'/api/company/settings/?designer_id={customer.pk}').status_code == 404
+
+
+def test_provision_preserves_empty_settings(setup):
+    from django.core.management import call_command
+    _, company, _ = setup
+    call_command('provision_companies')
+    call_command('provision_companies')
+    company.refresh_from_db()
+    assert company.budget_minimum is None
+    assert company.budget_maximum is None
+    assert not company.supported_property_types.exists()
