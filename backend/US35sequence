@@ -1,0 +1,53 @@
+@startuml
+skinparam sequenceMessageAlign center
+skinparam shadowing false
+
+actor Customer
+participant "BrowsePage\n(Boundary)" as BP
+participant "ProjectDetailPage\n(Boundary)" as PDP
+participant "ProjectController\n(Control)" as PC
+participant "ProjectServiceImpl\n(Service)" as PSI
+participant "ProjectRepositoryImpl\n(Repo)" as PRI
+participant "Project\n(Entity)" as P
+
+Customer -> BP : 1. Click on a specific project
+activate BP
+BP -> PDP : 2. Route to Detail Page(projectId)
+deactivate BP
+activate PDP
+
+PDP -> PC : 3. getProjectDetails(projectId)
+activate PC
+
+PC -> PC : 4. validateProjectId()
+
+PC -> PSI : 5. fetchProjectsById(projectId)
+activate PSI
+
+PSI -> PRI : 6. findById(projectId)
+activate PRI
+
+PRI -> P : 7. query project by ID
+activate P
+
+alt Project Found
+  P --> PRI : 8a. return Project data
+  PRI --> PSI : 9a. return Project
+  PSI --> PC : 10a. return Project
+  PC --> PDP : 11a. return Project
+  PDP --> Customer : 12a. Display Full Details
+else Project Not Found
+  P --> PRI : 8b. return Null
+  PRI --> PSI : 9b. throw Exception
+  PSI --> PC : 10b. propagate Exception
+  PC --> PDP : 11b. return 404 Error
+  PDP --> Customer : 12b. Show Error Page
+end
+
+deactivate P
+deactivate PRI
+deactivate PSI
+deactivate PC
+deactivate PDP
+
+@enduml
