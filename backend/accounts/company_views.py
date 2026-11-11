@@ -1,9 +1,8 @@
-from django.conf import settings
 from django.db import DatabaseError
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.exceptions import MethodNotAllowed
+from rest_framework.exceptions import MethodNotAllowed, ValidationError, NotFound
 from django.contrib.auth import get_user_model
 from .models import User, PropertyType
 from .company_services import CompanyRepository, BudgetRangeController, PropertyTypeController
@@ -11,7 +10,7 @@ from .company_services import CompanyRepository, BudgetRangeController, Property
 User = get_user_model()
 
 
-class CompanySettingsView(APIView):
+class CompanyDesignerView(APIView):
     permission_classes = [AllowAny]
 
     def handle_exception(self, exc):
@@ -20,15 +19,19 @@ class CompanySettingsView(APIView):
         return super().handle_exception(exc)
 
     def _get_designer(self, request):
-        designer_id = request.query_params.get('designer_id') or request.data.get('designer_id')
-        if designer_id:
-            try:
-                return User.objects.get(pk=designer_id, role=User.Role.INTERIOR_DESIGNER)
-            except User.DoesNotExist:
-                pass
-        # Default to first interior designer
-        return User.objects.filter(role=User.Role.INTERIOR_DESIGNER).first()
+        # Demo identity comes from the selector, separately from editable fields.
+        designer_id = request.query_params.get('designer_id')
+        if designer_id is None:
+            return User.objects.filter(role=User.Role.INTERIOR_DESIGNER).first()
+        if not designer_id.isascii() or not designer_id.isdecimal() or len(designer_id) > 18 or int(designer_id) < 1:
+            raise ValidationError({'designer_id': 'Select a valid designer ID.'})
+        try:
+            return User.objects.get(pk=int(designer_id), role=User.Role.INTERIOR_DESIGNER)
+        except User.DoesNotExist:
+            raise NotFound('Selected designer was not found.')
 
+
+class CompanySettingsView(CompanyDesignerView):
     def get(self, request):
         designer = self._get_designer(request)
         if not designer:
@@ -46,23 +49,7 @@ class PropertyTypeListView(APIView):
         return Response(list(PropertyType.objects.order_by('name').values('id', 'name')))
 
 
-class BudgetRangeView(APIView):
-    permission_classes = [AllowAny]
-
-    def handle_exception(self, exc):
-        if isinstance(exc, DatabaseError):
-            return Response({'detail': 'Unable to save or load company data. Please retry.'}, status=503)
-        return super().handle_exception(exc)
-
-    def _get_designer(self, request):
-        designer_id = request.query_params.get('designer_id') or request.data.get('designer_id')
-        if designer_id:
-            try:
-                return User.objects.get(pk=designer_id, role=User.Role.INTERIOR_DESIGNER)
-            except User.DoesNotExist:
-                pass
-        return User.objects.filter(role=User.Role.INTERIOR_DESIGNER).first()
-
+class BudgetRangeView(CompanyDesignerView):
     def patch(self, request):
         designer = self._get_designer(request)
         if not designer:
@@ -70,18 +57,7 @@ class BudgetRangeView(APIView):
         return Response({'budget': BudgetRangeController.updateRange(designer, request.data)})
 
 
-class SupportedPropertyTypeView(APIView):
-    permission_classes = [AllowAny]
-
-    def _get_designer(self, request):
-        designer_id = request.query_params.get('designer_id') or request.data.get('designer_id')
-        if designer_id:
-            try:
-                return User.objects.get(pk=designer_id, role=User.Role.INTERIOR_DESIGNER)
-            except User.DoesNotExist:
-                pass
-        return User.objects.filter(role=User.Role.INTERIOR_DESIGNER).first()
-
+class SupportedPropertyTypeView(CompanyDesignerView):
     def initial(self, request, *args, **kwargs):
         super().initial(request, *args, **kwargs)
         allowed = {'DELETE', 'OPTIONS'} if 'type_id' in kwargs else {'POST', 'OPTIONS'}

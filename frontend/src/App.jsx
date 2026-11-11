@@ -38,6 +38,12 @@ function Nav() {
     }
   }, [role])
 
+  useEffect(() => {
+    const changed = event => setSelectedDesigner(String(event.detail || ''))
+    window.addEventListener('designerChanged', changed)
+    return () => window.removeEventListener('designerChanged', changed)
+  }, [])
+
   const handleRoleChange = (e) => {
     setRole(e.target.value)
     localStorage.setItem('role', e.target.value)
