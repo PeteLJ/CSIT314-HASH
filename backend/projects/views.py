@@ -75,9 +75,15 @@ class ProjectController(generics.ListCreateAPIView):
         search = self.request.query_params.get('search')
         style = self.request.query_params.get('style')
         room_type = self.request.query_params.get('room_type')
-        budget_min = self.request.query_params.get('budget_min')
-        budget_max = self.request.query_params.get('budget_max')
         category = self.request.query_params.get('category')
+
+        params = self.request.query_params
+        criteria = SearchCriteriaDTO(data={
+            key: params[key] for key in ('budget_min', 'budget_max') if key in params
+        })
+        criteria.is_valid(raise_exception=True)
+        budget_min = criteria.validated_data.get('budget_min')
+        budget_max = criteria.validated_data.get('budget_max')
 
         if search:
             queryset = queryset.filter(
@@ -87,9 +93,9 @@ class ProjectController(generics.ListCreateAPIView):
             queryset = queryset.filter(style__iexact=style)
         if room_type:
             queryset = queryset.filter(room_type__iexact=room_type)
-        if budget_min:
+        if budget_min is not None:
             queryset = queryset.filter(budget_min__gte=budget_min)
-        if budget_max:
+        if budget_max is not None:
             queryset = queryset.filter(budget_min__lte=budget_max)
         if category:
             queryset = queryset.filter(category__name__iexact=category)
