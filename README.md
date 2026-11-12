@@ -21,13 +21,13 @@ cd backend
 python -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements.txt
-cp .env.example .env
 python manage.py migrate
 python manage.py createsuperuser
+python seed_data.py
 python manage.py runserver
 ```
 
-The backend & Database runs in PythonAnywhere's server, with Django admin dashboard at https://petelj.pythonanywhere.com/admin/.
+The backend runs locally at http://127.0.0.1:8000. Django admin at http://127.0.0.1:8000/admin/ (admin / admin123).
 
 ### Frontend
 
@@ -37,24 +37,24 @@ npm install
 npm run dev
 ```
 
-The frontend runs in Github Pages, at https://petelj.github.io/CSIT314-HASH/.
+Frontend runs at http://localhost:5173.
 
 ## Project Structure
 
 ```
 main/
-├── backend/          # Django project
-│   ├── config/       # Settings, URLs, WSGI
-│   ├── accounts/     # User model, roles, permissions
-│   ├── projects/     # InteriorDesignProject, InterestEvent, ProjectFlag
-│   ├── analytics/    # Analytics (portfolio, trends)
-│   ├── categories/   # Category model
+├── backend/
+│   ├── config/
+│   ├── accounts/
+│   ├── projects/
+│   ├── analytics/
+│   ├── categories/
 │   ├── requirements.txt
 │   └── .env.example
-├── frontend/         # React + Vite project
+├── frontend/
 │   ├── src/
 │   └── package.json
-├── .github/workflows/ci.yml
+├── .github/workflows/
 ├── .gitignore
 └── README.md
 ```
@@ -71,45 +71,38 @@ main/
 ## Platform Manager Features
 
 ### Manage project categories
-
-- Create categories with a name and description.
-- Rename existing categories inline from the management page.
-- Reject empty or duplicate category names (case-insensitive).
-- Show how many projects use each category.
-- Prevent deletion while a category is assigned to projects.
+- Create, rename, delete categories
+- Validate empty/duplicate names
+- Show project count per category
 
 API endpoints:
-
 - `GET/POST /api/categories/`
-- `GET/PATCH/DELETE /api/categories/<id>/`
+- `PATCH/DELETE /api/categories/<id>/`
 
 ### Review flagged projects
-
-- Customers can report a published project from its detail page.
-- Reports include a reason and optional supporting details.
-- Platform Managers see all open reports with project, designer and reporter context.
-- A report can be dismissed, or the project can be removed from public browsing.
-- Every moderation decision stores its status, note, reviewer and resolution time.
+- Flag reports with reason and details
+- Moderate (remove or dismiss)
 
 API endpoints:
-
 - `GET/POST /api/project-flags/`
 - `PATCH /api/project-flags/<id>/moderate/`
-
-After pulling changes that include new models, run:
-
-```bash
-cd backend
-python manage.py migrate
-```
 
 ## Running Tests
 
 ```bash
 cd backend
-python -m pytest
+python manage.py test
 ```
 
 ## CI/CD
 
-GitHub Actions runs the backend tests on every push and pull request to `main`. See `.github/workflows/ci.yml`.
+GitHub Actions runs backend tests on every push to `main`. See `.github/workflows/ci.yml`.
+
+---
+
+## Common Issues
+
+- **PythonAnywhere backend:** Live at https://petelj.pythonanywhere.com/admin/
+- **CORS errors:** Set `CORS_ALLOWED_ORIGINS` env var to include `http://localhost:5173`
+- **No projects showing:** Run `python seed_data.py` to populate database
+- **Company settings empty:** Run `python manage.py provision_companies` after migrate

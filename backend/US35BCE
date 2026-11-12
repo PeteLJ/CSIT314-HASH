@@ -1,0 +1,82 @@
+@startuml
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+hide empty members
+hide circle
+
+class ProjectDetailPage <<boundary>> {
+  - projectId: String
+  - errorMessage: String
+  + displayProjectDetails(ProjectDetailDTO): void
+  + showError(String): void
+}
+
+class ProjectController <<controller>> {
+  - projectRepository: ProjectRepository
+  - interestEventRepository: InterestEventRepository
+  + getProjectDetails(String): ProjectDetailDTO
+  + recordViewEvent(String): void
+}
+
+class InterestEventRepository <<repository>> {
+  - dbContext: Database
+  + save(InterestEvent): void
+}
+
+class ProjectRepository <<repository>> {
+  - dbContext: Database
+  + findById(String): InteriorDesignProject
+}
+
+class ProjectDetailDTO <<DTO>> {
+  - projectId: String
+  - title: String
+  - description: String
+  - budget: Decimal
+  - designerName: String
+  - viewCount: int
+  - shortlistCount: int
+  + getFormattedBudget(): String
+}
+
+class InterestEvent <<entity>> {
+  - eventId: String
+  - eventType: InterestEventType
+  - occurredAt: DateTime
+  + getEventType(): String
+}
+
+class InteriorDesignProject <<entity>> {
+  - projectId: String
+  - title: String
+  - description: String
+  - budget: Decimal
+  + getDetails(): String
+}
+
+class Designer <<entity>> {
+  - designerId: String
+  - name: String
+  + getName(): String
+}
+
+enum InterestEventType <<enumeration>> {
+  VIEW
+  SHORTLIST
+}
+
+' Relationships
+ProjectDetailPage ..> ProjectController : requests
+ProjectDetailPage ..> ProjectDetailDTO : renders
+ProjectController ..> ProjectRepository : fetches
+ProjectController ..> InterestEventRepository : records view
+ProjectController ..> ProjectDetailDTO : creates
+
+InterestEventRepository ..> InterestEvent : stores
+ProjectRepository ..> InteriorDesignProject : retrieves
+
+InteriorDesignProject "0..*" --> "1" Designer : designed by
+InterestEvent "0..*" --> "1" InteriorDesignProject : references
+InterestEvent --> InterestEventType : has type
+
+@enduml

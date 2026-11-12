@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Alert, Box, Button, Chip, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, MenuItem, Paper, Stack, TextField, Typography } from '@mui/material'
 import { companyRequest } from '../api/company'
 
@@ -17,37 +17,62 @@ export default function CompanySettingsPage() {
   const [notice, setNotice] = useState('')
   const [refreshRequired, setRefreshRequired] = useState(false)
 
-  async function load(resetBudget = true, designerId) {
-    const id = designerId || selectedDesignerId
+  const activeDesigner = useRef(selectedDesignerId)
+  const generation = useRef(0)
+
+  async function load(resetBudget = true, designerId = activeDesigner.current) {
+    const id = designerId
+    const version = generation.current
     const [record, types] = await Promise.all([companyRequest('/company/settings/', 'GET', undefined, id), companyRequest('/property-types/')])
+    if (version !== generation.current || id !== activeDesigner.current) return
     setCompany(record); setCatalog(types); setRefreshRequired(false)
     if (resetBudget) { setMinimum(record.budget?.minimum ?? ''); setMaximum(record.budget?.maximum ?? '') }
   }
+  async function selectDesigner(id) {
+    id = String(id || '')
+    activeDesigner.current = id
+    const version = ++generation.current
+    setSelectedDesignerId(id); setCompany(null); setRemove(null); setTypeId('')
+    setError(''); setNotice(''); setRefreshRequired(false); setBusy(false)
+    setLoading(true)
+    try {
+      if (!id) throw new Error('Select an interior designer to manage company settings.')
+      await load(true, id)
+    } catch (e) { if (version === generation.current) setError(e.message) }
+    finally { if (version === generation.current) setLoading(false) }
+  }
   async function initialLoad() {
     setLoading(true); setError('')
+    const version = generation.current
     try {
-      // Fetch designers
-      const users = await fetch(API_BASE + '/users/').then(r => r.json()).catch(() => [])
+      const users = await companyRequest('/users/')
       const designerList = (Array.isArray(users) ? users : users.results || []).filter(u => u.role === 'INTERIOR_DESIGNER')
       setDesigners(designerList)
-      if (!selectedDesignerId && designerList.length > 0) {
-        setSelectedDesignerId(String(designerList[0].id))
-        localStorage.setItem('designer_id', String(designerList[0].id))
-      }
-      await load(true, selectedDesignerId || (designerList.length > 0 ? String(designerList[0].id) : ''))
-    } catch (e) { setError(e.message) } finally { setLoading(false) }
+      if (version !== generation.current) return
+      const id = activeDesigner.current || String(designerList[0]?.id || '')
+      localStorage.setItem('designer_id', id)
+      window.dispatchEvent(new CustomEvent('designerChanged', { detail: id }))
+    } catch (e) {
+      if (version === generation.current) { setError(e.message); setLoading(false) }
+    }
   }
-  useEffect(() => { initialLoad() }, [])
-
-  // API base for fetching users
-  const API_BASE = window.location.hostname === 'localhost'
-    ? 'http://127.0.0.1:8000/api'
-    : 'https://petelj.pythonanywhere.com/api'
+  useEffect(() => {
+    const changed = event => { selectDesigner(event.detail) }
+    window.addEventListener('designerChanged', changed)
+    initialLoad()
+    return () => {
+      window.removeEventListener('designerChanged', changed)
+      generation.current++
+    }
+  }, [])
 
   async function mutate(path, method, data, message) {
+    const id = activeDesigner.current
+    const version = generation.current
     setBusy(true); setError(''); setNotice('')
     try {
-      const result = await companyRequest(path, method, data, selectedDesignerId)
+      const result = await companyRequest(path, method, data, id)
+      if (version !== generation.current) return
       if (path === '/company/budget-range/') {
         setCompany(previous => ({ ...previous, budget: result.budget }))
       } else if (method === 'POST') {
@@ -58,29 +83,30 @@ export default function CompanySettingsPage() {
         setCompany(previous => ({ ...previous, property_types: previous.property_types.filter(type => type.id !== removedId) }))
       }
       setNotice(message); setRemove(null); setTypeId('')
-      try { await load(path === '/company/budget-range/') } catch (e) { setRefreshRequired(true); setError(`Change saved, but refresh failed: ${e.message}`) }
-    } catch (e) { setError(e.message) } finally { setBusy(false) }
+      try { await load(path === '/company/budget-range/', id) } catch (e) { if (version !== generation.current) return; setRefreshRequired(true); setError(`Change saved, but refresh failed: ${e.message}`) }
+    } catch (e) { if (version === generation.current) setError(e.message) } finally { if (version === generation.current) setBusy(false) }
   }
   async function retryRefresh() {
+    const version = generation.current
     setBusy(true); setError('')
-    try { await load(false, selectedDesignerId) } catch (e) { setError(e.message) } finally { setBusy(false) }
+    try { await load(false) } catch (e) { if (version === generation.current) setError(e.message) } finally { if (version === generation.current) setBusy(false) }
   }
   function saveBudget(e) {
     e.preventDefault()
     if (minimum.trim() === '' || maximum.trim() === '' || !Number.isFinite(Number(minimum)) || !Number.isFinite(Number(maximum)) || Number(minimum) < 0 || Number(maximum) < Number(minimum)) {
       setError('Enter valid non-negative amounts. Minimum must not exceed maximum.'); return
     }
-    mutate('/company/budget-range/', 'PATCH', { minimum, maximum, designer_id: selectedDesignerId }, 'Budget range saved.')
+    mutate('/company/budget-range/', 'PATCH', { minimum, maximum }, 'Budget range saved.')
   }
   const choices = catalog.filter(t => !company?.property_types.some(selected => selected.id === t.id))
   return <Box sx={{ maxWidth: 900, mx: 'auto', p: 3, color: '#e0e0e0' }}>
     <Typography variant="h4" gutterBottom sx={{ color: '#fff' }}>Company settings</Typography>
-    <Typography sx={{ mb: 2, color: '#ccc' }}>Company belongs to the authenticated designer. The menu selector does not change the signed-in account.</Typography>
+    <Typography sx={{ mb: 2, color: '#ccc' }}>Manage the company of the selected interior designer.</Typography>
     {refreshRequired && <Button disabled={busy} onClick={retryRefresh}>Retry refresh</Button>}
     {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
     {notice && <Alert severity="success" sx={{ mb: 2 }}>{notice}</Alert>}
     {loading ? <CircularProgress aria-label="Loading company settings" /> : !company ? <Button onClick={initialLoad}>Retry loading</Button> : <Stack spacing={3}>
-      <TextField select label="Select Designer" value={selectedDesignerId} onChange={e => { setSelectedDesignerId(e.target.value); localStorage.setItem('designer_id', e.target.value); load(true, e.target.value) }} sx={{ maxWidth: 160, '& .MuiOutlinedInput-root': { color: '#e0e0e0', background: 'rgba(255,255,255,0.05)' }, '& .MuiInputLabel-root': { color: '#ccc' }, '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.3)' } }}>
+      <TextField select label="Select Designer" value={selectedDesignerId} disabled={busy} onChange={e => { localStorage.setItem('designer_id', e.target.value); window.dispatchEvent(new CustomEvent('designerChanged', { detail: e.target.value })) }} sx={{ maxWidth: 160, '& .MuiOutlinedInput-root': { color: '#e0e0e0', background: 'rgba(255,255,255,0.05)' }, '& .MuiInputLabel-root': { color: '#ccc' }, '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.3)' } }}>
         {designers.map(d => <MenuItem key={d.id} value={d.id} sx={{ color: '#000', background: '#fff' }}>{d.username}</MenuItem>)}
       </TextField>
       <Typography variant="h6" sx={{ color: '#fff' }}>{company.name}</Typography>
@@ -94,7 +120,7 @@ export default function CompanySettingsPage() {
           <TextField select label="Property type" value={typeId} onChange={e => setTypeId(e.target.value)} disabled={busy} sx={{ minWidth: 160, '& .MuiOutlinedInput-root': { color: '#e0e0e0', background: 'rgba(255,255,255,0.05)' }, '& .MuiInputLabel-root': { color: '#ccc' }, '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.3)' } }}>
             {choices.map(t => <MenuItem key={t.id} value={t.id} sx={{ color: '#000', background: '#fff' }}>{t.name}</MenuItem>)}
           </TextField>
-          <Button disabled={busy || !typeId} onClick={() => mutate('/company/property-types/', 'POST', { type_id: typeId, designer_id: selectedDesignerId }, 'Property type added.')} sx={{ padding: '0.3rem 0.6rem', borderRadius: '8px', border: 'none', background: '#c4704b', color: 'white', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.8rem', marginLeft: '1rem', '&:hover': { background: '#a85a3a' }, '&:disabled': { opacity: 0.6, cursor: 'not-allowed' } }}>Add type</Button>
+          <Button disabled={busy || !typeId} onClick={() => mutate('/company/property-types/', 'POST', { type_id: typeId }, 'Property type added.')} sx={{ padding: '0.3rem 0.6rem', borderRadius: '8px', border: 'none', background: '#c4704b', color: 'white', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.8rem', marginLeft: '1rem', '&:hover': { background: '#a85a3a' }, '&:disabled': { opacity: 0.6, cursor: 'not-allowed' } }}>Add type</Button>
         </Stack>
         {choices.length === 0 && <Typography sx={{ mt: 2, color: '#ccc' }}>No additional types available.</Typography>}
       </Paper>

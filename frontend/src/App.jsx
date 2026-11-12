@@ -32,10 +32,17 @@ function Nav() {
         if (!selectedDesigner && designerList.length > 0) {
           setSelectedDesigner(String(designerList[0].id))
           localStorage.setItem('designer_id', String(designerList[0].id))
+          window.dispatchEvent(new CustomEvent('designerChanged', { detail: String(designerList[0].id) }))
         }
       }).catch(err => console.error('Failed to load designers:', err))
     }
   }, [role])
+
+  useEffect(() => {
+    const changed = event => setSelectedDesigner(String(event.detail || ''))
+    window.addEventListener('designerChanged', changed)
+    return () => window.removeEventListener('designerChanged', changed)
+  }, [])
 
   const handleRoleChange = (e) => {
     setRole(e.target.value)

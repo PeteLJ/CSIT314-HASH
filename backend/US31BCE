@@ -1,0 +1,81 @@
+@startuml
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+hide empty members
+hide circle
+
+class BrowsePage <<boundary>> {
+  - currentFilters: SearchCriteriaDTO
+  - isLoading: boolean
+  + displayProjectList(List<ProjectSummaryDTO>): void
+  + applyFilters(SearchCriteriaDTO): void
+  + showEmptyState(): void
+}
+
+class ProjectController <<controller>> {
+  - projectRepository: ProjectRepository
+  + getPublishedProjects(SearchCriteriaDTO): List<ProjectSummaryDTO>
+}
+
+class ProjectRepository <<repository>> {
+  - dbContext: Database
+  + findAllPublished(SearchCriteriaDTO): List<InteriorDesignProject>
+}
+
+class SearchCriteriaDTO <<DTO>> {
+  - searchQuery: String
+  - style: String
+  - roomType: String
+  - budgetMin: Decimal
+  - budgetMax: Decimal
+  + getFilters(): Map
+}
+
+class ProjectSummaryDTO <<DTO>> {
+  - projectId: String
+  - title: String
+  - style: String
+  - budget: Decimal
+  - designerName: String
+  + getDetails(): String
+}
+
+class InteriorDesignProject <<entity>> {
+  - projectId: String
+  - title: String
+  - style: String
+  - budget: Decimal
+  - publicationStatus: PublicationStatus
+  + getDetails(): String
+}
+
+class Designer <<entity>> {
+  - designerId: String
+  - name: String
+  + getName(): String
+}
+
+class ProjectImage <<entity>> {
+  - imageId: String
+  - imageUrl: String
+  + getUrl(): String
+}
+
+enum PublicationStatus <<enumeration>> {
+  DRAFT
+  PUBLISHED
+  UNPUBLISHED
+}
+
+' Relationships
+BrowsePage ..> ProjectController : requests
+BrowsePage ..> ProjectSummaryDTO : displays
+ProjectController ..> SearchCriteriaDTO : takes
+ProjectController ..> ProjectRepository : queries
+ProjectRepository ..> InteriorDesignProject : retrieves
+
+InteriorDesignProject "0..*" --> "1" Designer : owned by
+InteriorDesignProject "1" *--> "0..*" ProjectImage : has
+InteriorDesignProject --> PublicationStatus : has status
+
+@enduml

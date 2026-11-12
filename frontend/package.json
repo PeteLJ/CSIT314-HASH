@@ -1,4 +1,4 @@
-﻿{
+{
     "name":  "frontend",
     "private":  true,
     "version":  "0.0.0",
@@ -7,6 +7,7 @@
                     "dev":  "vite",
                     "build":  "vite build",
                     "lint":  "oxlint",
+                    "test:interest": "node --import tsx tests/interest-dashboard.tsx",
                     "preview":  "vite preview"
                 },
     "dependencies":  {

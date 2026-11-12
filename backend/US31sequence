@@ -1,0 +1,47 @@
+@startuml
+skinparam sequenceMessageAlign center
+skinparam shadowing false
+
+actor Customer
+participant "BrowsePage\n(Boundary)" as BP
+participant "ProjectDetailPage\n(Boundary)" as PDP
+participant "ProjectController\n(Control)" as PC
+participant "ProjectServiceImpl\n(Service)" as PSI
+participant "ProjectRepositoryImpl\n(Repo)" as PRI
+participant "Project\n(Entity)" as P
+
+Customer -> BP : 1. Open Browse Page
+activate BP
+
+BP -> PC : 2. getProjectsForBrowse()
+activate PC
+
+PC -> PSI : 3. fetchAllProjects()
+activate PSI
+
+PSI -> PSI : 4. calculatePagination()
+
+PSI -> PRI : 5. findAll()
+activate PRI
+
+PRI -> PRI : 6. buildSQLQuery()
+
+PRI -> P : 7. retrieve project list
+activate P
+
+P --> PRI : 8. return List<Project>
+deactivate P
+
+PRI --> PSI : 9. return List<Project>
+deactivate PRI
+
+PSI --> PC : 10. return List<Project>
+deactivate PSI
+
+PC --> BP : 11. return List<Project>
+deactivate PC
+
+BP --> Customer : 12. Display project cards
+deactivate BP
+
+@enduml
