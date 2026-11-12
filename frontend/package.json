@@ -8,6 +8,7 @@
                     "build":  "vite build",
                     "lint":  "oxlint",
                     "test:interest": "node --import tsx tests/interest-dashboard.tsx",
+                    "test:search": "node --import tsx tests/browse-search.tsx",
                     "preview":  "vite preview"
                 },
     "dependencies":  {

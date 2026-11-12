@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from rest_framework import serializers
 from .models import InteriorDesignProject, InterestEvent, ProjectFlag
 
@@ -161,8 +163,20 @@ class SearchCriteriaDTO(serializers.Serializer):
     search_query = serializers.CharField(required=False, allow_blank=True)
     style = serializers.CharField(required=False, allow_blank=True)
     room_type = serializers.CharField(required=False, allow_blank=True)
-    budget_min = serializers.DecimalField(max_digits=10, decimal_places=2, required=False)
-    budget_max = serializers.DecimalField(max_digits=10, decimal_places=2, required=False)
+    budget_min = serializers.DecimalField(
+        max_digits=10, decimal_places=2, min_value=Decimal('0'), required=False,
+    )
+    budget_max = serializers.DecimalField(
+        max_digits=10, decimal_places=2, min_value=Decimal('0'), required=False,
+    )
+
+    def validate(self, attrs):
+        minimum, maximum = attrs.get('budget_min'), attrs.get('budget_max')
+        if minimum is not None and maximum is not None and maximum < minimum:
+            raise serializers.ValidationError({
+                'budget_max': 'Maximum budget must be greater than or equal to minimum budget.',
+            })
+        return attrs
 
     def get_filters(self):
         """Return non-empty filters."""
