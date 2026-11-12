@@ -100,6 +100,5 @@ for p in [project1, project2, project3]:
     p.delete()
 print("  Deleted 3 test projects and interest events")
 
-print("\n" + "=" * 60)
+print("\n")
 print("US-48 Tests Complete - 4/4 passed")
-print("=" * 60)

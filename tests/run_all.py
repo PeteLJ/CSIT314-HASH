@@ -7,13 +7,13 @@ import sys
 import os
 
 scripts = [
-    'test_us03_search_filter.py',
-    'test_us12_property_types.py',
-    'test_us21_create_project.py',
-    'test_us35_view_details.py',
-    'test_us48_portfolio_overview.py',
-    'test_us49_trend_chart.py',
-    'test_us51_categories.py',
+    'test_US03.py',
+    'test_US12.py',
+    'test_US21.py',
+    'test_US35.py',
+    'test_US48.py',
+    'test_US49.py',
+    'test_US51.py',
 ]
 
 print("=" * 70)

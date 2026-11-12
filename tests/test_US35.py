@@ -15,7 +15,8 @@ from django.contrib.auth import get_user_model
 from projects.models import InteriorDesignProject, InterestEvent
 from categories.models import ProjectCategory
 from django.test import RequestFactory
-from projects.views import ProjectDetailView, RecordViewView, ViewCountView, ShortlistCountView
+from projects.views import ProjectDetailView, RecordViewView
+from analytics.views import ViewCountView, ShortlistCountView
 
 User = get_user_model()
 
@@ -53,7 +54,7 @@ print(f"  Current counts: 3 views, 1 shortlist")
 factory = RequestFactory()
 
 print("\n[Test 1] Get project details")
-print(f"  Sending GET /api/projects/{project.id}/...")
+print("  Sending GET /api/projects/{id}/ ...")
 request = factory.get(f'/api/projects/{project.id}/')
 view = ProjectDetailView.as_view()
 response = view(request, pk=project.id)
@@ -65,20 +66,21 @@ print(f"  View count: {response.data.get('view_count')}")
 print(f"  Shortlist count: {response.data.get('shortlist_count')}")
 print("  PASS" if response.status_code == 200 and response.data.get('title') == 'Detail Test Project' else "  FAIL")
 
-print("\n[Test 2] Record a view event (increase view count from 3 to 4)")
-print("  Before: View count = 3")
+print("\n[Test 2] Record view event")
+print("  Sending POST /api/projects/{id}/record-view/ ...")
 request = factory.post(f'/api/projects/{project.id}/record-view/', {}, content_type='application/json')
 view = RecordViewView.as_view()
 response = view(request, pk=project.id)
 print(f"  Status: {response.status_code}")
-print(f"  After: Sent record-view request")
+print(f"  After: Recorded view event")
+print("  PASS" if response.status_code == 201 else "  FAIL")
 
 print("\n[Test 3] Verify view count increased")
+print("  Before: View count was 3")
 request = factory.get(f'/api/projects/{project.id}/view-count/')
 view = ViewCountView.as_view()
 response = view(request, pk=project.id)
-print(f"  View count before: 3")
-print(f"  View count after:  {response.data.get('view_count')}")
+print(f"  View count after: {response.data.get('view_count')}")
 print(f"  Status: {response.status_code}")
 print("  PASS" if response.status_code == 200 and response.data.get('view_count') == 4 else "  FAIL")
 
@@ -102,6 +104,5 @@ InterestEvent.objects.filter(project=project).delete()
 project.delete()
 print("  Deleted test project and interest events")
 
-print("\n" + "=" * 60)
+print("\n")
 print("US-35 Tests Complete - 5/5 passed")
-print("=" * 60)

@@ -58,7 +58,7 @@ if project_id:
     print(f"    -> Title: {db_project.title}, Status: {db_project.status}, Designer: {db_project.designer.username}")
 print("  PASS" if response.status_code == 201 and response.data.get('status') == 'DRAFT' else "  FAIL")
 
-print("\n[Test 2] Create project with empty title (should fail)")
+print("\n[Test 2] Create project with empty title (It should fail)")
 print("  Sending POST /api/projects/ with empty title...")
 request = factory.post('/api/projects/', {
     'title': '',
@@ -92,6 +92,5 @@ if project_id:
     InteriorDesignProject.objects.filter(id=project_id).delete()
     print(f"  Deleted project ID: {project_id}")
 
-print("\n" + "=" * 60)
+print("\n")
 print("US-21 Tests Complete - 3/3 passed")
-print("=" * 60)

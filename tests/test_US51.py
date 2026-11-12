@@ -70,14 +70,14 @@ if category_id:
 else:
     print("  SKIPPED (no category created in Test 2)")
 
-print("\n[Test 5] Rename with empty name (should fail)")
+print("\n[Test 5] Rename with empty name (It should fail)")
 if category_id:
     print(f"  Before: Category name is 'Renamed Category US51'")
     view = ProjectCategoryUpdateView.as_view()
     request = factory.patch(f'/api/categories/{category_id}/update/', {'name': '', 'description': 'Test'}, content_type='application/json')
     response = view(request, pk=category_id)
     print(f"  Status: {response.status_code} (expected: 400)")
-    print(f"  After: Name unchanged (validation prevented empty name)")
+    print(f"  After: Name unchanged (validation prevents empty name)")
     print("  PASS" if response.status_code == 400 else "  FAIL")
 else:
     print("  SKIPPED (no category created in Test 2)")
@@ -98,6 +98,5 @@ if category_id:
 else:
     print("  SKIPPED (no category created in Test 2)")
 
-print("\n" + "=" * 60)
+print("\n")
 print("US-51 Tests Complete - 6/7 passed (1 skipped if no category)")
-print("=" * 60)

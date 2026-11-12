@@ -6,9 +6,9 @@ Website (GitHub Pages): https://petelj.github.io/CSIT314-HASH/
 
 ## Tech Stack
 
-- **Backend:** Python 3.9 + Django 4.2 + Django REST Framework
+- **Backend:** Python 3.10 + Django 4.2 + Django REST Framework
 - **Frontend:** React 18 + Vite + Material UI (MUI) + Chart.js
-- **Database:** SQLite
+- **Database:** SQLite (development) / PostgreSQL (production)
 - **CI/CD:** GitHub Actions
 - **Agile tool:** Taiga
 
@@ -27,7 +27,7 @@ python manage.py createsuperuser
 python manage.py runserver
 ```
 
-The backend & Database runs in Google Cloud VM?, at `TBC`. The admin panel is at `TBC`.
+The backend & Database runs in PythonAnywhere's server, with Django admin dashboard at https://petelj.pythonanywhere.com/admin/.
 
 ### Frontend
 
@@ -37,21 +37,21 @@ npm install
 npm run dev
 ```
 
-The frontend runs in Github Pages, at `TBC`.
+The frontend runs in Github Pages, at https://petelj.github.io/CSIT314-HASH/.
 
 ## Project Structure
 
 ```
 main/
-├── backend/          # Django project      (current state: pending creation)
+├── backend/          # Django project
 │   ├── config/       # Settings, URLs, WSGI
 │   ├── accounts/     # User model, roles, permissions
-│   ├── projects/     # IDP, IDPViewEvent, Favourite
-│   ├── analytics/    # Analytics (placeholder)
+│   ├── projects/     # InteriorDesignProject, InterestEvent, ProjectFlag
+│   ├── analytics/    # Analytics (portfolio, trends)
 │   ├── categories/   # Category model
 │   ├── requirements.txt
 │   └── .env.example
-├── frontend/         # React + Vite project      (current state: blank template web app)
+├── frontend/         # React + Vite project
 │   ├── src/
 │   └── package.json
 ├── .github/workflows/ci.yml
@@ -66,7 +66,7 @@ main/
 | Customer | Browses and saves design projects |
 | Interior Designer | Manages company info and portfolio |
 | User Admin | Manages user accounts |
-| Platform Manager | Manages categories and reports |
+| Platform Manager | Manages categories and moderation |
 
 ## Platform Manager Features
 

@@ -90,6 +90,5 @@ for p in projects:
     p.delete()
 print("  Deleted 5 test projects")
 
-print("\n" + "=" * 60)
+print("\n")
 print("US-03 Tests Complete - 5/5 passed")
-print("=" * 60)
