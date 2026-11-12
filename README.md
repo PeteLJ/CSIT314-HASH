@@ -30,7 +30,9 @@ python manage.py runserver
 The backend runs locally at http://127.0.0.1:8000. Django admin at http://127.0.0.1:8000/admin/
 
 The backend is also deployed on PythonAnywhere's server at https://petelj.pythonanywhere.com/admin/
+
 Username: admin
+
 Password: admin123
 
 ### Frontend
