@@ -22,8 +22,9 @@ class Command(BaseCommand):
             company_name = user.company.strip() if user.company.strip() else f'{user.username} Design Studio'
             company, created = Company.objects.get_or_create(
                 designer=user, defaults={'name': company_name})
-            if created:
-                count += 1
+            if not created:
+                continue  # Preserve existing settings, including deliberately empty values.
+            count += 1
 
             # Assign property types if not already set
             if company.supported_property_types.count() == 0 and all_types:
